@@ -1,0 +1,4 @@
+[submodule "src/ros2_socketcan"]
+	path = src/ros2_socketcan
+	url = https://github.com/autowarefoundation/ros2_socketcan
+	branch = humble
