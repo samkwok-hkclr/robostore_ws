@@ -1,0 +1,20 @@
+services:
+# ======================== Build Images ===========================
+  ros2_base:
+    build:
+      context: .
+      tags: 
+        - "ros2_img:latest"
+      target: ros2_img
+    entrypoint: ["sh", "-c", "exit"]
+
+  ros2_canopen:
+    build:
+      context: .
+      tags: 
+        - "robostore_img:latest"
+      target: robostore_img
+    depends_on:
+      ros2_base:
+        condition: service_completed_successfully
+    entrypoint: ["sh", "-c", "exit"]
