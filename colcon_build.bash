@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/bin/bash
 
 REALSENSE_CAMERA=realsense2_camera
 

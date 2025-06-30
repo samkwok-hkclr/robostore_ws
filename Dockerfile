@@ -54,4 +54,4 @@ RUN rosdep fix-permissions
 RUN rosdep update
 RUN rosdep install --from-paths src --ignore-src --rosdistro $ROS_DISTRO -r -y
 
-RUN . colcon_build.bash
+# To be continued...

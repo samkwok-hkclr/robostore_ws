@@ -8,7 +8,7 @@ services:
       target: ros2_img
     entrypoint: ["sh", "-c", "exit"]
 
-  ros2_canopen:
+  robostore:
     build:
       context: .
       tags: 

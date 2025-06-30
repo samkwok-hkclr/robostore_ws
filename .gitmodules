@@ -13,6 +13,16 @@
 	url = https://github.com/samkwok-hkclr/elevation_platform_msgs
 	branch = master
 
+[submodule "src/nachi_mz07l"]
+	path = src/nachi_mz07l
+	url = https://github.com/samkwok-hkclr/nachi_mz07l
+	branch = master
+
+[submodule "src/nachi_robot"]
+	path = src/nachi_robot
+	url = https://github.com/samkwok-hkclr/nachi_robot
+	branch = master
+
 [submodule "src/ultrasonic_sensor"]
 	path = src/ultrasonic_sensor
 	url = https://github.com/samkwok-hkclr/ultrasonic_sensor
