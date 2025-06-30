@@ -23,6 +23,16 @@
 	url = https://github.com/samkwok-hkclr/nachi_robot
 	branch = master
 
+[submodule "src/robot_controller/robot_controller"]
+	path = src/nachi_robot/robot_controller
+	url = https://github.com/samkwok-hkclr/robot_controller
+	branch = master
+
+[submodule "src/robot_controller/robot_controller_msgs"]
+	path = src/nachi_robot/robot_controller_msgs
+	url = https://github.com/samkwok-hkclr/robot_controller_msgs
+	branch = master
+
 [submodule "src/ultrasonic_sensor"]
 	path = src/ultrasonic_sensor
 	url = https://github.com/samkwok-hkclr/ultrasonic_sensor
