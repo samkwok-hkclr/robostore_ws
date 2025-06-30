@@ -24,12 +24,12 @@
 	branch = master
 
 [submodule "src/robot_controller/robot_controller"]
-	path = src/nachi_robot/robot_controller
+	path = src/robot_controller/robot_controller
 	url = https://github.com/samkwok-hkclr/robot_controller
 	branch = master
 
 [submodule "src/robot_controller/robot_controller_msgs"]
-	path = src/nachi_robot/robot_controller_msgs
+	path = src/robot_controller/robot_controller_msgs
 	url = https://github.com/samkwok-hkclr/robot_controller_msgs
 	branch = master
 
