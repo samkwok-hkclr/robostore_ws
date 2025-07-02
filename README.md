@@ -2,8 +2,7 @@
 
 ## Prerequisites
 
-* A host PC with Docker and Git installed.
-* CAN Module installed.
+* CAN Module w/ Linux SocketCAN installed.
 * TBC...
 
 ## Installation
@@ -19,13 +18,13 @@ git clone --recurse-submodules https://github.com/samkwok-hkclr/robostore_ws
 ```bash
 sudo rosdep init
 rosdep update
-sudo rosdep install --from-paths src --ignore-src --rosdistro $ROS_DISTRO -r -y
+rosdep install --from-paths src --ignore-src --rosdistro $ROS_DISTRO -r -y
 ```
 
 ### 3. Build the packages
 
 ```bash
-./colcon_build.bash
+colcon build
 ```
 
 ### 4. TBD

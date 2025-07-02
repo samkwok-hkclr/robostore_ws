@@ -37,7 +37,6 @@ COPY --chmod=755 ./docker/entrypoint.sh /
 RUN dos2unix /entrypoint.sh 
 ENTRYPOINT [ "/entrypoint.sh" ]
 
-# FOR TESTING ONLY!!!!!!!!!!!!!!!!!!!!!!!! 
 # ========== robostore_img ========== 
 FROM ros2_img:latest AS robostore_img
 
