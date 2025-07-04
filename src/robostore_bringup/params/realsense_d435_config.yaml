@@ -1,0 +1,79 @@
+# RealSense Camera Configuration
+/robostore/left_hand:
+  ros__parameters:
+    serial_no: "138422074515" 
+    usb_port_id: ""
+    device_type: ""
+    initial_reset: false
+
+    # Color stream configuration
+    enable_color: true
+    rgb_camera:
+      color_profile: "1280,720,6"  # Width x Height x FPS
+      color_format: "RGB8"
+      enable_auto_exposure: true
+
+    # Depth stream configuration
+    enable_depth: true
+    depth_module:
+      depth_profile: "1280,720,6"
+      depth_format: "Z16"
+      enable_auto_exposure: true
+      exposure: 8500
+      gain: 16
+      hdr_enabled: false
+
+    # Infrared streams
+    enable_infra: true
+    enable_infra1: false
+    enable_infra2: false
+
+    # IMU settings
+    enable_gyro: false
+    enable_accel: false
+    gyro_fps: 0
+    accel_fps: 0
+    unite_imu_method: 2 # 0-None, 1-copy, 2-linear_interpolation
+
+    intra_process_comms: true
+    enable_sync: true
+
+    # Point cloud settings
+    pointcloud:
+      enable: true
+      stream_filter: 2
+      stream_index_filter: 0
+      ordered_pc: false
+      allow_no_texture_points: false
+
+    enable_rgbd: true
+
+    # Depth processing filters
+    align_depth:
+      enable: true  
+    colorizer:
+      enable: false
+    decimation_filter:
+      enable: true
+    spatial_filter:
+      enable: true
+    temporal_filter:
+      enable: true
+    disparity_filter:
+      enable: false
+    hole_filling_filter:
+      enable: true
+    hdr_merge:
+      enable: true
+
+    # TF settings
+    publish_tf: true
+    tf_publish_rate: 1.0  # 0=only on change
+    
+    # Advanced settings
+    angular_velocity_cov: 0.01
+    linear_accel_cov: 0.01
+    clip_distance: -2.0  # Negative value disables clipping
+    diagnostics_period: 5.0  # 0=disabled
+    wait_for_device_timeout: -1.0  # -1=wait indefinitely
+    reconnect_timeout: 3.0

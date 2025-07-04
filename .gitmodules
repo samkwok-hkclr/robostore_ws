@@ -33,6 +33,11 @@
 	url = https://github.com/samkwok-hkclr/robot_controller_msgs
 	branch = master
 
+[submodule "src/robotic_platform"]
+	path = src/robotic_platform
+	url = https://github.com/samkwok-hkclr/robotic_platform
+	branch = master
+
 [submodule "src/ultrasonic_sensor"]
 	path = src/ultrasonic_sensor
 	url = https://github.com/samkwok-hkclr/ultrasonic_sensor
