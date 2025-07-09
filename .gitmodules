@@ -3,6 +3,11 @@
 	url = https://github.com/samkwok-hkclr/can_transceiver
 	branch = master
 
+[submodule "src/camera_manager"]
+	path = src/camera_manager
+	url = https://github.com/samkwok-hkclr/camera_manager
+	branch = master
+
 [submodule "src/elevation_platform/elevation_platform"]
 	path = src/elevation_platform/elevation_platform
 	url = https://github.com/samkwok-hkclr/elevation_platform
@@ -12,6 +17,21 @@
 	path = src/elevation_platform/elevation_platform_msgs
 	url = https://github.com/samkwok-hkclr/elevation_platform_msgs
 	branch = master
+
+[submodule "src/external_libraries/ros2_socketcan"]
+	path = src/external_libraries/ros2_socketcan
+	url = https://github.com/autowarefoundation/ros2_socketcan
+	branch = humble
+
+[submodule "src/external_libraries/ros2_canopen"]
+	path = src/external_libraries/ros2_canopen
+	url = https://github.com/ros-industrial/ros2_canopen
+	branch = humble
+
+[submodule "src/external_libraries/realsense-ros"]
+	path = src/external_libraries/realsense-ros
+	url = https://github.com/IntelRealSense/realsense-ros
+	branch = ros2-master
 
 [submodule "src/nachi_mz07l"]
 	path = src/nachi_mz07l
@@ -38,6 +58,11 @@
 	url = https://github.com/samkwok-hkclr/robotic_platform
 	branch = master
 
+[submodule "src/robotic_platform_msgs"]
+	path = src/robotic_platform_msgs
+	url = https://github.com/samkwok-hkclr/robotic_platform_msg
+	branch = master
+
 [submodule "src/ultrasonic_sensor"]
 	path = src/ultrasonic_sensor
 	url = https://github.com/samkwok-hkclr/ultrasonic_sensor
@@ -48,17 +73,7 @@
 	url = https://github.com/samkwok-hkclr/vacuum_gripper
 	branch = master
 
-[submodule "src/external_libraries/ros2_socketcan"]
-	path = src/external_libraries/ros2_socketcan
-	url = https://github.com/autowarefoundation/ros2_socketcan
-	branch = humble
-
-[submodule "src/external_libraries/ros2_canopen"]
-	path = src/external_libraries/ros2_canopen
-	url = https://github.com/ros-industrial/ros2_canopen
-	branch = humble
-
-[submodule "src/external_libraries/realsense-ros"]
-	path = src/external_libraries/realsense-ros
-	url = https://github.com/IntelRealSense/realsense-ros
-	branch = ros2-master
+[submodule "src/vision_recognition"]
+	path = src/vision_recognition
+	url = https://github.com/samkwok-hkclr/vision_recognition
+	branch = master

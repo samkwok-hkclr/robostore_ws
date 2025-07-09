@@ -1,4 +1,4 @@
-# RoboStore
+# RoboStore Workspace
 
 ## Prerequisites
 
