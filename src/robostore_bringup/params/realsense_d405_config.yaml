@@ -1,22 +1,22 @@
 # RealSense Camera Configuration
 /robostore/left_hand:
   ros__parameters:
-    serial_no: "138422074515" 
+    serial_no: "230322271686" 
     usb_port_id: ""
     device_type: ""
-    initial_reset: false
+    initial_reset: true
 
     # Color stream configuration
     enable_color: true
     rgb_camera:
-      color_profile: "848,480,6" # "1280,720,6"  # Width x Height x FPS
+      color_profile: "1280,720,5" # Width x Height x FPS
       color_format: "RGB8"
       enable_auto_exposure: true
 
     # Depth stream configuration
     enable_depth: true
     depth_module:
-      depth_profile: "848,480,6" # "1280,720,6"
+      depth_profile: "1280,720,5"
       depth_format: "Z16"
       enable_auto_exposure: true
       exposure: 8500

@@ -130,7 +130,7 @@ def generate_launch_description():
     )
 
     # RViz
-    rviz_config_file = os.path.join(get_package_share_directory("robostore_bringup"), "rviz", "moveit.rviz")
+    rviz_config_file = os.path.join(get_package_share_directory("robostore_bringup"), "rviz", "moveit_visual_w_image.rviz")
 
     rviz_node = Node(
         package='rviz2',
