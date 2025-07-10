@@ -60,7 +60,7 @@
 
 [submodule "src/robotic_platform_msgs"]
 	path = src/robotic_platform_msgs
-	url = https://github.com/samkwok-hkclr/robotic_platform_msg
+	url = https://github.com/samkwok-hkclr/robotic_platform_msgs
 	branch = master
 
 [submodule "src/ultrasonic_sensor"]
