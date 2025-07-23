@@ -1,0 +1,7 @@
+build/
+install/
+log/
+backup/
+vision_data/
+cmd.txt
+test.log

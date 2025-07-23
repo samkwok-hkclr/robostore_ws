@@ -1,8 +1,3 @@
-[submodule "src/can_transceiver"]
-	path = src/can_transceiver
-	url = https://github.com/samkwok-hkclr/can_transceiver
-	branch = master
-
 [submodule "src/camera_manager"]
 	path = src/camera_manager
 	url = https://github.com/samkwok-hkclr/camera_manager
@@ -21,11 +16,6 @@
 [submodule "src/external_libraries/ros2_socketcan"]
 	path = src/external_libraries/ros2_socketcan
 	url = https://github.com/autowarefoundation/ros2_socketcan
-	branch = humble
-
-[submodule "src/external_libraries/ros2_canopen"]
-	path = src/external_libraries/ros2_canopen
-	url = https://github.com/ros-industrial/ros2_canopen
 	branch = humble
 
 [submodule "src/external_libraries/realsense-ros"]
@@ -61,11 +51,6 @@
 [submodule "src/robotic_platform_msgs"]
 	path = src/robotic_platform_msgs
 	url = https://github.com/samkwok-hkclr/robotic_platform_msgs
-	branch = master
-
-[submodule "src/ultrasonic_sensor"]
-	path = src/ultrasonic_sensor
-	url = https://github.com/samkwok-hkclr/ultrasonic_sensor
 	branch = master
 
 [submodule "src/vacuum_gripper"]

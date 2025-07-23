@@ -1,0 +1,142 @@
+scan_poses:
+  - scan_order: 1
+    sku_id: 174 # Nescafe Continental Coffee 250ml
+    pose: 
+      position: [0.22, -0.555, 1.41]
+      orientation: [0.5, 0.5, -0.5, 0.5]
+  - scan_order: 2
+    sku_id: 35 # Coca-cola Coke Dragon 330ml
+    pose: 
+      position: [0.145, -0.555, 1.415]
+      orientation: [0.5, 0.5, -0.5, 0.5]
+  - scan_order: 3
+    sku_id: 10004 # Cool Water 750ml
+    pose: 
+      position: [0.07, -0.53, 1.46]
+      orientation: [0.5, 0.5, -0.5, 0.5]
+  - scan_order: 4
+    sku_id: 17 # Coca-cola Coke 500ml
+    pose: 
+      position: [-0.005, -0.53, 1.45]
+      orientation: [0.5, 0.5, -0.5, 0.5]
+  - scan_order: 5
+    sku_id: 234 # ION Supply Drink Pocari Sweat Bottle 500ml
+    pose: 
+      position: [-0.07, -0.535, 1.435]
+      orientation: [0.5, 0.5, -0.5, 0.5]
+  - scan_order: 6
+    sku_id: 166 # Tsuji - Oolong Tea 500ml
+    pose: 
+      position: [-0.145, -0.535, 1.435]
+      orientation: [0.5, 0.5, -0.5, 0.5]
+  - scan_order: 7
+    sku_id: 28 # Lucozade 300ml
+    pose: 
+      position: [-0.20, -0.535, 1.435]
+      orientation: [0.5, 0.5, -0.5, 0.5]
+
+home_pose:
+  position: [0.6, 0.0, 1.6]
+  orientation: [0.0, 0.7853975, 0.0, 0.7853975]
+
+middle_pose:
+  position: [0.5, 0.0, 1.4]
+  orientation: [0.0, 0.7853975, 0.0, 0.7853975]
+
+pre_scan_pose:
+  position: [0.0, -0.45, 1.6]
+  orientation: [0.5, 0.5, -0.5, 0.5]
+
+pre_pick_pose:
+  position: [0.1, 0.65, 1.2]
+  orientation: [-0.5, 0.5, 0.5, 0.5]
+
+pre_place_pose:
+  position: [0.0, -0.45, 1.6]
+  orientation: [0.5, 0.5, -0.5, 0.5]
+
+before_pick_waypoints:
+  - order: 1
+    pose: 
+      position: [0.6, 0.0, 1.6]
+      orientation: [0.0, 0.7853975, 0.0, 0.7853975]
+  - order: 2
+    pose: 
+      position: [0.4, 0.4, 1.5]
+      orientation: [-0.2705981, 0.6532815, 0.2705981, 0.6532815]  
+  - order: 3
+    pose: 
+      position: [0.1, 0.6, 1.3]
+      orientation: [-0.5, 0.5, 0.5, 0.5]
+
+lifted_pick_waypoints:
+  - order: 1
+    pose: 
+      position:  [0.2, 0.50, 1.15]
+      orientation: [-0.5, 0.5, 0.5, 0.5]
+  - order: 2
+    pose: 
+      position: [0.35, 0.45, 1.20]
+      orientation: [-0.3535534, 0.6123724, 0.3535534, 0.6123724]  
+  - order: 3
+    pose: 
+      position: [0.4, 0.3, 1.25]
+      orientation: [-0.2705981, 0.6532815, 0.2705981, 0.6532815] 
+  - order: 4
+    pose: 
+      position: [0.45, 0.2, 1.30]
+      orientation: [-0.1830127, 0.6830127, 0.1830127, 0.6830127]
+  # - order: 5
+  #   pose: 
+  #     position: [0.6, 0.0, 1.6]
+  #     orientation: [0.0, 0.7853975, 0.0, 0.7853975]
+
+before_place_waypoints:
+  # - order: 1
+  #   pose: 
+  #     position: [0.6, 0.0, 1.6]
+  #     orientation: [0.0, 0.7853975, 0.0, 0.7853975]
+  - order: 2
+    pose: 
+      position: [0.3, -0.2, 1.5]
+      orientation: [0.2705981, 0.6532815, -0.2705981, 0.6532815]  
+  - order: 3
+    pose: 
+      position: [0.0, -0.45, 1.6]
+      orientation: [0.5, 0.5, -0.5, 0.5]
+
+lifted_place_waypoints:
+  - order: 1
+    pose: 
+      position: [0.0, -0.45, 1.6]
+      orientation: [0.5, 0.5, -0.5, 0.5]
+
+place_poses:
+  - sku_id: 174 # Nescafe Continental Coffee 250ml
+    pose: 
+      position: [0.22, -0.585, 1.51]
+      orientation: [0.5, 0.5, -0.5, 0.5]
+  - sku_id: 35 # Coca-cola Coke Dragon 330ml
+    pose: 
+      position: [0.145, -0.585, 1.52]
+      orientation: [0.5, 0.5, -0.5, 0.5]
+  - sku_id: 10004 # Cool Water 750ml
+    pose: 
+      position: [0.07, -0.585, 1.565]
+      orientation: [0.5, 0.5, -0.5, 0.5]
+  - sku_id: 17 # Coca-cola Coke 500ml
+    pose: 
+      position: [-0.005, -0.585, 1.56]
+      orientation: [0.5, 0.5, -0.5, 0.5]
+  - sku_id: 166 # Tsuji - Oolong Tea 500ml
+    pose: 
+      position: [-0.07, -0.585, 1.56]
+      orientation: [0.5, 0.5, -0.5, 0.5]
+  - sku_id: 234 # ION Supply Drink Pocari Sweat Bottle 500ml
+    pose: 
+      position: [-0.145, -0.585, 1.565]
+      orientation: [0.5, 0.5, -0.5, 0.5]
+  - sku_id: 28 # Lucozade 300ml
+    pose: 
+      position: [-0.20, -0.585, 1.535]
+      orientation: [0.5, 0.5, -0.5, 0.5]

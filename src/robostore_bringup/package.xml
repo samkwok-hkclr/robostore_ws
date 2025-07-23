@@ -11,6 +11,14 @@
 
   <exec_depend>realsense2_camera</exec_depend>
 
+  <exec_depend>camera_manager</exec_depend>
+  <exec_depend>nachi_robot</exec_depend>
+  <exec_depend>robot_controller</exec_depend>
+  <exec_depend>robotic_platform</exec_depend>
+  <exec_depend>vacuum_gripper</exec_depend>
+  <exec_depend>vision_recognition</exec_depend>
+  <exec_depend>ros2_socketcan</exec_depend>
+
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
 

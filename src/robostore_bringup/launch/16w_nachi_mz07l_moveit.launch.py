@@ -3,7 +3,7 @@ import yaml
 
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
-from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
+from launch.substitutions import LaunchConfiguration, PathJoinSubstitution, Command, FindExecutable
 from launch_ros.actions import Node
 from launch.conditions import IfCondition
 from launch_ros.substitutions import FindPackageShare
@@ -32,7 +32,6 @@ def load_yaml(package_name, file_path):
 
 
 def generate_launch_description():
-
     launch_rviz = LaunchConfiguration("launch_rviz")
 
     declare_launch_rviz_cmd = DeclareLaunchArgument(
@@ -44,8 +43,20 @@ def generate_launch_description():
     description_pkg_name = "mz07l_description"
     moveit_config_pkg_name = "mz07l_moveit_config"
 
-    robot_description_config = load_file(description_pkg_name, "urdf/mz07L_dual.urdf")
-    robot_description = {'robot_description' : robot_description_config}
+    robot_description_content = Command(
+        [
+            PathJoinSubstitution([FindExecutable(name="xacro")]),
+            " ",
+            PathJoinSubstitution(
+                [FindPackageShare(description_pkg_name), "urdf", "mz07L_16w.urdf.xacro"]
+            )
+        ]
+    )
+
+    robot_description = {"robot_description": robot_description_content}
+
+    # robot_description_config = load_file(description_pkg_name, "urdf/mz07L_dual.urdf")
+    # robot_description = {'robot_description' : robot_description_config}
 
     robot_description_semantic_config = load_file(moveit_config_pkg_name, "config/mz07L.srdf")
     robot_description_semantic = {'robot_description_semantic' : robot_description_semantic_config}
@@ -115,20 +126,6 @@ def generate_launch_description():
         parameters=[robot_description]
     )
 
-    robot_node = Node(
-        package='nachi_robot',
-        executable='nachi_robot_node',
-        name='nachi_robot_node',
-        output='both',
-        parameters=[
-            {
-                "ip": "192.168.2.20",
-                "model": "mz07L",
-                "fake": True,
-            }
-        ]
-    )
-
     # RViz
     rviz_config_file = os.path.join(get_package_share_directory("robostore_bringup"), "rviz", "moveit_visual_w_image.rviz")
 
@@ -150,7 +147,6 @@ def generate_launch_description():
     ld.add_action(declare_launch_rviz_cmd)
     ld.add_action(move_group_node)
     ld.add_action(robot_state_publisher)
-    ld.add_action(robot_node)
     ld.add_action(rviz_node)
 
     return ld

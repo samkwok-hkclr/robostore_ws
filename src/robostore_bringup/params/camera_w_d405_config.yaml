@@ -1,3 +1,19 @@
+camera_manager:
+  ros__parameters:
+    sim: false
+    camera_id: [1]
+    image_topic: [
+      "/robostore/left_hand/color/image_rect_raw", 
+      ]
+    pointcloud_topic: [
+      "/robostore/left_hand/depth/color/points", 
+      ]
+
+data_saver:
+  ros__parameters:
+    workspace_name: "robostore_ws"
+    save_folder_name: "vision_data"
+
 # RealSense Camera Configuration
 /robostore/left_hand:
   ros__parameters:
@@ -9,14 +25,14 @@
     # Color stream configuration
     enable_color: true
     rgb_camera:
-      color_profile: "1280,720,5" # Width x Height x FPS
+      color_profile: "848,480,30" # Width x Height x FPS
       color_format: "RGB8"
       enable_auto_exposure: true
 
     # Depth stream configuration
     enable_depth: true
     depth_module:
-      depth_profile: "1280,720,5"
+      depth_profile: "848,480,30"
       depth_format: "Z16"
       enable_auto_exposure: true
       exposure: 8500
@@ -24,7 +40,7 @@
       hdr_enabled: false
 
     # Infrared streams
-    enable_infra: true
+    enable_infra: false
     enable_infra1: false
     enable_infra2: false
 

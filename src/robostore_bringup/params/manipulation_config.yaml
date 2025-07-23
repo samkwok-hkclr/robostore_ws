@@ -1,0 +1,51 @@
+action_planner:
+  ros__parameters:
+    sim: false
+    eef_offset: [0.0, 0.0, 0.0]
+    pre_obj_pose_shift: 0.05
+    pre_place_pose_shift: 0.06
+    post_pick_lift_offset: 0.02
+    post_pick_back_offset: 0.1 # max: ???
+    post_place_down_offset: 0.015
+
+motion_planner:
+  ros__parameters:
+    sim: false
+    move_to_srv_names: ["home_pose", "middle_pose", "pre_pick_pose", "pre_place_pose"]
+
+collision_planner:
+  ros__parameters:
+    sim: false
+
+vacuum_gripper_ctlr:
+  ros__parameters:
+    sim: false
+    leak_threshold: -50000.0 # unit: Pa
+
+robot_controller:
+  ros__parameters:
+    group_name: arm # defined in the autostore for nachi mz07l 
+    eef_name: tcp
+    default_eef_step: 0.005
+    default_jump_threshold: 5.0
+    
+nachi_robot:
+  ros__parameters:
+    sim: false
+    model: "mz07L"
+    ip: "192.168.2.10"
+
+vacuum_gripper:
+  ros__parameters:
+    sim: false
+    can_id: 0x55
+
+    # valve
+    no_of_channel: 2
+
+    # ultrasonic sensor
+    enable_ultrasonic: true
+    field_of_view: 0.3
+    min_range: 0.05
+    max_range: 0.5
+
