@@ -1,5 +1,5 @@
 # ========== ros2_img ========== 
-FROM ubuntu:22.04 AS ros2_img
+FROM pytorch/pytorch:2.7.0-cuda12.6-cudnn9-runtime AS ros2_img
 
 RUN apt update
 RUN DEBIAN_FRONTEND="noninteractive" apt install -y tzdata
@@ -16,8 +16,7 @@ ENV LANG=en_US.UTF-8
 
 RUN apt install -y curl systemd udev software-properties-common
 RUN add-apt-repository universe
-RUN curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key \ 
-    -o /usr/share/keyrings/ros-archive-keyring.gpg
+RUN curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg
 RUN echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(. /etc/os-release && echo $UBUNTU_CODENAME) main" \
     | tee /etc/apt/sources.list.d/ros2.list > /dev/null
 RUN apt update && apt -y upgrade
@@ -48,9 +47,16 @@ WORKDIR /${WS_NAME}
 COPY ./src ./src
 COPY ./colcon_build.bash .
 
+COPY ./fastdds_profiles.xml ./
+ENV FASTRTPS_DEFAULT_PROFILES_FILE=/${WS_NAME}/fastdds_profiles.xml
+
 RUN rosdep init
 RUN rosdep fix-permissions
 RUN rosdep update
 RUN rosdep install --from-paths src --ignore-src --rosdistro $ROS_DISTRO -r -y
+
+
+RUN . /opt/ros/${ROS_DISTRO}/setup.sh && colcon build 
+#--packages-select ros2_socketcan_msgs --cmake-args -DCMAKE_BUILD_TYPE=Release
 
 # To be continued...
