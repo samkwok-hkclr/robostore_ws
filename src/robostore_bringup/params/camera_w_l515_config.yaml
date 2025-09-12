@@ -3,10 +3,10 @@ camera_manager:
     sim: false
     camera_id: [1]
     image_topic: [
-      "/robostore/left_hand/color/image_rect_raw", 
+      "/left_hand/color/image_raw", 
       ]
     pointcloud_topic: [
-      "/robostore/left_hand/depth/color/points", 
+      "/left_hand/depth/color/points", 
       ]
 
 data_saver:
@@ -14,35 +14,52 @@ data_saver:
     workspace_name: "robostore_ws"
     save_folder_name: "vision_data"
 
-# RealSense Camera Configuration
-/robostore/left_hand:
+web_video_server:
   ros__parameters:
-    serial_no: "230322271686" 
+    port: 18080
+    address: '192.168.2.200'
+    server_threads: 2
+    ros_threads: 4
+    # default_stream_type: 'h264'
+  
+# RealSense Camera Configuration
+/left_hand/realsense:
+  ros__parameters:
+    serial_no: "f0350229" 
     usb_port_id: ""
     device_type: ""
-    initial_reset: true
+    initial_reset: false
 
     # Color stream configuration
     enable_color: true
     rgb_camera:
-      color_profile: "848,480,30" # Width x Height x FPS
-      color_format: "RGB8"
+      profile: "1280,720,15" # Width x Height x FPS
       enable_auto_exposure: true
+      enable_auto_white_balance: true
+      host_performance: 0
+      global_time_enabled: true
 
     # Depth stream configuration
     enable_depth: true
     depth_module:
-      depth_profile: "848,480,30"
-      depth_format: "Z16"
-      enable_auto_exposure: true
-      exposure: 8500
-      gain: 16
-      hdr_enabled: false
+      profile: "1024x768x30"
+      alternate_ir: false
+      confidence_threshold: 1
+      digital_gain: 2
+      receiver_gain: 18
+      host_performance: 0
+      min_distance: 190
+      global_time_enabled: true
+      noise_filtering: 4
+      post_processing_sharpening: 1
+      pre_processing_sharpening: 0
+      sensor_mode: 1
+      visual_preset: 5
+      invalidation_bypass: false
 
     # Infrared streams
     enable_infra: false
-    enable_infra1: false
-    enable_infra2: false
+    enable_confidence: true
 
     # IMU settings
     enable_gyro: false
@@ -58,8 +75,8 @@ data_saver:
     pointcloud:
       enable: true
       stream_filter: 2
-      stream_index_filter: 0
-      ordered_pc: false
+      # stream_index_filter: 0
+      ordered_pc: true # false
       allow_no_texture_points: false
 
     enable_rgbd: true
@@ -83,6 +100,7 @@ data_saver:
       enable: true
 
     # TF settings
+    publish_odom_tf: false
     publish_tf: true
     tf_publish_rate: 0.0  # 0=only on change
     

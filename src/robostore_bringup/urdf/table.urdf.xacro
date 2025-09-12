@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<robot name="table" xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <xacro:include filename="$(find robostore_bringup)/urdf/place_location.urdf.xacro" />
+
+  <xacro:macro name="table" params="name id parent *origin">
+
+    <xacro:property name="table_width" value="1.2"/>
+    <xacro:property name="table_depth" value="0.7"/>
+    <xacro:property name="table_height" value="0.85"/>
+    
+    <joint name="${name}_${id}_joint" type="fixed">
+      <joint_properties damping="1" friction="1" />
+      <xacro:insert_block name="origin" />
+      <parent link="${parent}"/>
+      <child link="${name}_${id}_base_link"/>
+    </joint>
+
+    <link name="table_${id}_base_link">
+      <visual>
+        <origin xyz="${table_width/2} ${table_depth/2} ${table_height/2}" rpy="0 0 0"/>
+        <geometry>
+          <box size="${table_width} ${table_depth} ${table_height}"/>
+        </geometry>
+        <material name="white"/>
+      </visual>
+
+      <collision>
+        <origin xyz="${table_width/2} ${table_depth/2} ${table_height/2}" rpy="0 0 0"/>
+        <geometry>
+          <box size="${table_width} ${table_depth} ${table_height}"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <xacro:place_location parent="${name}_${id}_base_link" prefix="${name}_${id}" index="1">
+      <origin xyz="0.4 0.15 ${table_height}" rpy="0 0 0"/>
+    </xacro:place_location>
+
+    <xacro:place_location parent="${name}_${id}_base_link" prefix="${name}_${id}" index="2">
+      <origin xyz="0.5 0.15 ${table_height}" rpy="0 0 0"/>
+    </xacro:place_location>
+
+    <xacro:place_location parent="${name}_${id}_base_link" prefix="${name}_${id}" index="3">
+      <origin xyz="0.6 0.15 ${table_height}" rpy="0 0 0"/>
+    </xacro:place_location>
+
+    <xacro:place_location parent="${name}_${id}_base_link" prefix="${name}_${id}" index="4">
+      <origin xyz="0.4 0.05 ${table_height}" rpy="0 0 0"/>
+    </xacro:place_location>
+
+    <xacro:place_location parent="${name}_${id}_base_link" prefix="${name}_${id}" index="5">
+      <origin xyz="0.5 0.05 ${table_height}" rpy="0 0 0"/>
+    </xacro:place_location>
+
+    <xacro:place_location parent="${name}_${id}_base_link" prefix="${name}_${id}" index="6">
+      <origin xyz="0.6 0.05 ${table_height}" rpy="0 0 0"/>
+    </xacro:place_location>
+  </xacro:macro>
+  
+</robot>

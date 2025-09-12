@@ -7,6 +7,7 @@ from launch.substitutions import LaunchConfiguration, PathJoinSubstitution, Comm
 from launch_ros.actions import Node
 from launch.conditions import IfCondition
 from launch_ros.substitutions import FindPackageShare
+from launch_ros.descriptions import ParameterValue
 from ament_index_python.packages import get_package_share_directory
 from moveit_configs_utils import MoveItConfigsBuilder
 
@@ -50,10 +51,13 @@ def generate_launch_description():
             PathJoinSubstitution(
                 [FindPackageShare(description_pkg_name), "urdf", "mz07L_16w.urdf.xacro"]
             )
-        ]
+        ],
     )
+    print(robot_description_content)
 
-    robot_description = {"robot_description": robot_description_content}
+    robot_description = {
+        "robot_description": ParameterValue(robot_description_content, value_type=str)
+    }
 
     # robot_description_config = load_file(description_pkg_name, "urdf/mz07L_dual.urdf")
     # robot_description = {'robot_description' : robot_description_config}

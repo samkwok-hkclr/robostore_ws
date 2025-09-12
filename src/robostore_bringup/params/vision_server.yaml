@@ -1,0 +1,6 @@
+recognition_server:
+  ros__parameters:
+    # calibration result in 20250818
+    folder_name: "vision_data"
+    ws_name: "robostore_ws"
+    

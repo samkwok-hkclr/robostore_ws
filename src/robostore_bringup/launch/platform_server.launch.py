@@ -3,10 +3,13 @@ import os
 from ament_index_python.packages import get_package_share_directory
 
 from launch import LaunchDescription
-from launch_ros.actions import Node
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.actions import IncludeLaunchDescription, DeclareLaunchArgument
-from launch.substitutions import LaunchConfiguration
+from launch.substitutions import LaunchConfiguration, PathJoinSubstitution, Command, FindExecutable
+
+from launch_ros.actions import Node
+from launch_ros.descriptions import ParameterValue
+from launch_ros.substitutions import FindPackageShare
 
 def generate_launch_description():
     ld = LaunchDescription()
@@ -40,14 +43,41 @@ def generate_launch_description():
         description="",
     )
 
+    robot_description_config = Command(
+        [
+            PathJoinSubstitution([FindExecutable(name="xacro")]),
+            " ",
+            PathJoinSubstitution(
+                [FindPackageShare("robostore_bringup"), "urdf", "16w_env.urdf.xacro"]
+            )
+        ]
+    )
+
+    robot_description = {
+        "robot_description": ParameterValue(robot_description_config, value_type=str),
+    }
+
+    robot_state_publisher = Node(
+        package="robot_state_publisher",
+        executable="robot_state_publisher",
+        output="screen",
+        parameters=[robot_description],
+        remappings=[
+            ('/joint_states', '/robotic_platform/joint_states'), 
+            # ('/tf', '/robotic_platform/tf'), 
+            # ('/tf_static', '/robotic_platform/tf_static'),
+            ('/robot_description', '/robotic_platform/robot_description')
+        ]
+    )
+
     ld.add_action(declare_use_respawn_cmd)
     ld.add_action(declare_params_file_cmd)
     ld.add_action(declare_col_obj_file_cmd)
     ld.add_action(declare_poses_file_cmd)
 
-    manipulation_server = Node(
+    platform_server = Node(
         package='robotic_platform',
-        executable='manipulation_server',
+        executable='platform_server',
         parameters=[
             params_file,
             {
@@ -94,9 +124,11 @@ def generate_launch_description():
     )
 
 
-    ld.add_action(manipulation_server)
+    ld.add_action(platform_server)
     ld.add_action(robot_node)
     ld.add_action(vacuum_gripper_node)
     ld.add_action(robot_controller_node)
+
+    ld.add_action(robot_state_publisher)
 
     return ld

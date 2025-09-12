@@ -10,6 +10,10 @@
   <arg name="use_bus_time" default="false" />
   <arg name="filters" default="0x60:0xFF,0x61:0xFF,0x62:0xFF,0x63:0xFF,0x1D5:0x7FF,0x2D5:0x7FF,0x3D5:0x7FF" />
 
+  <arg name="default_call_service_timeout" default="5.0" />
+  <arg name="call_services_in_new_thread" default="true" />
+  <arg name="send_action_goals_in_new_thread" default="true" />
+
   <include file="$(find-pkg-share ros2_socketcan)/launch/socket_can_receiver.launch.py">
     <arg name="interface" value="$(var interface)" />
     <arg name="interval_sec" value="$(var receiver_interval_sec)" />
@@ -27,6 +31,12 @@
     <arg name="to_can_bus_topic" value="$(var to_can_bus_topic)" />
 
     <arg name="use_bus_time" value="$(var use_bus_time)" />
+  </include>
+
+  <include file="$(find-pkg-share rosbridge_server)/launch/rosbridge_websocket_launch.xml">
+    <arg name="default_call_service_timeout" value="$(var default_call_service_timeout)" />
+    <arg name="call_services_in_new_thread" value="$(var call_services_in_new_thread)" />
+    <arg name="send_action_goals_in_new_thread" value="$(var send_action_goals_in_new_thread)" />
   </include>
 
 </launch>

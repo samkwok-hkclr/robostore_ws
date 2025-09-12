@@ -1,0 +1,21 @@
+<?xml version="1.0" ?>
+
+<robot name="robostore_env" xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <xacro:include filename="$(find robostore_bringup)/urdf/materials.xacro" />
+  <xacro:include filename="$(find robostore_bringup)/urdf/table.urdf.xacro" />
+  <xacro:include filename="$(find robostore_bringup)/urdf/rack.urdf.xacro" />
+
+  <xacro:arg name="to_be_done" default="false"/>
+
+  <link name="map"/>
+
+  <xacro:table name="table" id="1" parent="map">
+    <origin xyz="1.32 0 0" rpy="0 0 3.14159265359"/>
+  </xacro:table>
+
+  <xacro:rack name="rack" id="1" parent="map">
+    <origin xyz="0.26 1.255 0" rpy="0 0 0"/>
+  </xacro:rack>
+
+</robot>

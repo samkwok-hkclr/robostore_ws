@@ -16,7 +16,7 @@ def generate_launch_description():
     declare_params_file_cmd = DeclareLaunchArgument(
         "params_file",
         default_value=os.path.join(
-            get_package_share_directory("robostore_bringup"), "params", "camera_w_d405_config.yaml"),
+            get_package_share_directory("robostore_bringup"), "params", "camera_w_l515_config.yaml"),
         description="",
     )
 
@@ -24,8 +24,8 @@ def generate_launch_description():
 
     realsense_node = Node(
         package='realsense2_camera',
-        namespace="robostore",
-        name="left_hand",
+        namespace="left_hand",
+        name="realsense",
         executable='realsense2_camera_node',
         parameters=[
             params_file
@@ -47,7 +47,19 @@ def generate_launch_description():
         emulate_tty=True,
     )
 
+    web_video_server = Node(
+        package='web_video_server',
+        executable='web_video_server',
+        parameters=[
+            params_file
+        ],
+        output="screen",
+        arguments=['--ros-args', '--log-level', "info"],
+        emulate_tty=True,
+    )
+
     ld.add_action(realsense_node)
     ld.add_action(camera_manager)
+    ld.add_action(web_video_server)
 
     return ld
