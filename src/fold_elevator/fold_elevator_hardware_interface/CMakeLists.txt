@@ -15,6 +15,7 @@ find_package(std_msgs REQUIRED)
 find_package(std_srvs REQUIRED)
 find_package(can_msgs REQUIRED)
 find_package(ros2_control REQUIRED) 
+find_package(fold_elevator_msgs REQUIRED) 
 
 add_library(
   ${PROJECT_NAME}
@@ -42,6 +43,7 @@ ament_target_dependencies(${PROJECT_NAME}
   std_msgs
   std_srvs
   ros2_control
+  fold_elevator_msgs
 )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES

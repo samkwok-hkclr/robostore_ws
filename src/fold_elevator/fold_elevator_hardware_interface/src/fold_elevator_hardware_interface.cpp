@@ -7,16 +7,22 @@ FoldElevatorHardwareInterface::FoldElevatorHardwareInterface()
   : hardware_interface::SystemInterface()
   , logger_(rclcpp::get_logger("FoldElevatorHardwareInterface"))
   , activated_(false)
+  , desired_config_update_period_(rclcpp::Duration::from_seconds(1.0))
   , shutdown_requested_(false)
   , executor_(std::make_shared<rclcpp::executors::SingleThreadedExecutor>())
   , node_(std::make_shared<rclcpp::Node>("auxiliary_node"))
   , action_command_(true)
   , halt_timer_activated_(false)
 {
+  srv_ser_cbg_ = node_->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
+
+  last_read_time_ = node_->get_clock()->now();
+
   lock_status_pub_ = node_->create_publisher<UInt8>("fold_elevator_lock_status", 10);
+  // curr_pub_ = node_->create_publisher<Int32>("motor_current", 10);
 
   lock_status_pub_timer_ = node_->create_wall_timer(
-    std::chrono::milliseconds(500), 
+    std::chrono::milliseconds(1000), 
     std::bind(&FoldElevatorHardwareInterface::lock_status_pub_cb, this));
 
   // auto_halt_timer_ = node_->create_wall_timer(
@@ -38,9 +44,8 @@ FoldElevatorHardwareInterface::FoldElevatorHardwareInterface()
 hardware_interface::CallbackReturn 
 FoldElevatorHardwareInterface::on_init(const hardware_interface::HardwareInfo& info)
 {
-  if (hardware_interface::SystemInterface::on_init(info) != CallbackReturn::SUCCESS) {
+  if (hardware_interface::SystemInterface::on_init(info) != CallbackReturn::SUCCESS) 
     return CallbackReturn::ERROR;
-  }
 
   RCLCPP_INFO(logger_, "to initialize %zu motors", info.joints.size());
 
@@ -52,22 +57,24 @@ FoldElevatorHardwareInterface::on_init(const hardware_interface::HardwareInfo& i
   motor_configs_.resize(info.joints.size());
   std::vector<struct can_filter> can_filters;
 
-  for (size_t i = 0; i < info.joints.size(); ++i) {
+  for (size_t i = 0; i < info.joints.size(); ++i) 
+  {
     const auto& joint = info.joints[i];
     joint_indices_[joint.name] = i;
 
-    for (const auto& cmd_if : joint.command_interfaces) {
-      if (cmd_if.name == hardware_interface::HW_IF_POSITION) {
+    for (const auto& cmd_if : joint.command_interfaces) 
+    {
+      if (cmd_if.name == hardware_interface::HW_IF_POSITION) 
         supports_position_command_[i] = true;
-      } else if (cmd_if.name == hardware_interface::HW_IF_VELOCITY) {
+      else if (cmd_if.name == hardware_interface::HW_IF_VELOCITY) 
         supports_velocity_command_[i] = true;
-      } else if (cmd_if.name == hardware_interface::HW_IF_EFFORT) {
+      else if (cmd_if.name == hardware_interface::HW_IF_EFFORT) 
         supports_effort_command_[i] = true;
-      }
     }
     
-    try {
-      motor_configs_[i].can_id = static_cast<uint32_t>(std::stoi(joint.parameters.at("can_id"), nullptr, 16));
+    try 
+    {
+      motor_configs_[i].can_id = static_cast<uint8_t>(std::stoi(joint.parameters.at("can_id"), nullptr, 16));
       can_filters.push_back({motor_configs_[i].can_id, CAN_SFF_MASK});
       motor_configs_[i].gear_ratio = std::stod(joint.parameters.at("gear_ratio"));
       motor_configs_[i].position_offset = joint.parameters.count("position_offset") ? 
@@ -87,7 +94,29 @@ FoldElevatorHardwareInterface::on_init(const hardware_interface::HardwareInfo& i
       motor_configs_[i].max_velocity = joint.parameters.count("max_velocity") ? std::stod(joint.parameters.at("max_velocity")) : 0.5;
       motor_configs_[i].min_velocity = joint.parameters.count("min_velocity") ? std::stod(joint.parameters.at("min_velocity")) : -0.5;
       
-    } catch (const std::exception& e) {
+      const uint8_t can_id = motor_configs_[i].can_id;
+      const std::string topic_prefix = "/fold_elevator/motor_" + joint.parameters.at("can_id");
+      config_pubs_[can_id] = node_->create_publisher<MotorConfigMsg>(topic_prefix + "/config", 10);
+      status_pubs_[can_id] = node_->create_publisher<MotorStatusMsg>(topic_prefix + "/status", 10);
+      RCLCPP_INFO(logger_, "can_id: 0x%x, create status and config publisher", can_id);
+
+      for (const auto& type : PID_TYPE)
+      {
+        for (const auto& val : PID)
+        {
+          const std::string key = type + "_" + val;
+          const std::string srv_name = "/fold_elevator/motor_" + joint.parameters.at("can_id") + "/set_" + key;
+          pid_srv_[can_id][key] = node_->create_service<PidSrv>(
+            srv_name, 
+            std::bind(&FoldElevatorHardwareInterface::set_pid_cb, this, _1, _2, can_id, key),
+            rmw_qos_profile_services_default,
+            srv_ser_cbg_);
+          RCLCPP_INFO(logger_, "can_id: 0x%x, create service %s", can_id, srv_name.c_str());
+        }
+      }
+    } 
+    catch (const std::exception& e) 
+    {
       RCLCPP_ERROR(logger_, "Failed to initialize joint %s: %s", joint.name.c_str(), e.what());
       return CallbackReturn::ERROR;
     }
@@ -106,11 +135,22 @@ FoldElevatorHardwareInterface::on_init(const hardware_interface::HardwareInfo& i
   running_sums_.resize(info.joints.size(), 0.0);
   position_status_.resize(info.joints.size(), MotorState::IDLE);
 
-  if (info.hardware_parameters.count("can_interface")) {
-    can_interface_ = info.hardware_parameters.at("can_interface");
-  } else {
-    return CallbackReturn::ERROR;
+  if (info.hardware_parameters.count("desired_config_update_period"))
+  {
+    int update_rate = std::stoi(info.hardware_parameters.at("desired_config_update_rate"));
+    if (update_rate <= 0) 
+    {
+      RCLCPP_FATAL(logger_, "desired_config_update_rate must be > 0");
+      return hardware_interface::CallbackReturn::ERROR;
+    }
+    
+    desired_config_update_period_ = rclcpp::Duration::from_seconds(1.0 / update_rate);
   }
+
+  if (info.hardware_parameters.count("can_interface")) 
+    can_interface_ = info.hardware_parameters.at("can_interface");
+  else 
+    return CallbackReturn::ERROR;
   
   motorDriver_ = std::make_unique<Ti5RobotCRADriver>(can_interface_);
   motorDriver_->setCanFrameFilters(can_filters);
@@ -124,9 +164,11 @@ FoldElevatorHardwareInterface::on_init(const hardware_interface::HardwareInfo& i
 hardware_interface::CallbackReturn 
 FoldElevatorHardwareInterface::on_configure(const rclcpp_lifecycle::State& /* previous_state */)
 {
-  for (size_t i = 0; i < motor_configs_.size(); ++i) {
+  for (size_t i = 0; i < motor_configs_.size(); ++i) 
+  {
     const auto& config = motor_configs_[i];
-    if (config.can_id == 0 || config.gear_ratio <= 0) {
+    if (config.can_id == 0 || config.gear_ratio <= 0) 
+    {
       RCLCPP_ERROR(logger_, "Invalid configuration for motor %zu", i);
       return CallbackReturn::ERROR;
     }
@@ -134,92 +176,93 @@ FoldElevatorHardwareInterface::on_configure(const rclcpp_lifecycle::State& /* pr
     Ti5RobotCRADriverStatus motor_status = Ti5RobotCRADriverStatus::SUCCESS;
     
     motor_status = motorDriver_->setPositionP(config.can_id, config.position_p);
-    if (motor_status != Ti5RobotCRADriverStatus::SUCCESS) {
-      RCLCPP_ERROR(logger_, "Error(%d) in calling motorDriver_->setPositionP(0x%x, %d)", 
-                        motor_status, config.can_id, config.position_p);
+    if (motor_status != Ti5RobotCRADriverStatus::SUCCESS) 
+    {
+      RCLCPP_ERROR(logger_, "Error(%d) in calling motorDriver_->setPositionP(0x%x, %d)", motor_status, config.can_id, config.position_p);
       return CallbackReturn::ERROR;
     }
 
     motor_status = motorDriver_->setPositionD(config.can_id, config.position_d);
-    if (motor_status != Ti5RobotCRADriverStatus::SUCCESS) {
-      RCLCPP_ERROR(logger_, "Error(%d) in calling motorDriver_->setPositionD(0x%x, %d)", 
-                        motor_status, config.can_id, config.position_d);
+    if (motor_status != Ti5RobotCRADriverStatus::SUCCESS) 
+    {
+      RCLCPP_ERROR(logger_, "Error(%d) in calling motorDriver_->setPositionD(0x%x, %d)", motor_status, config.can_id, config.position_d);
       return CallbackReturn::ERROR;
     }
 
     motor_status = motorDriver_->setVelocityP(config.can_id, config.velocity_p);
-    if (motor_status != Ti5RobotCRADriverStatus::SUCCESS) {
-      RCLCPP_ERROR(logger_, "Error(%d) in calling motorDriver_->setVelocityP(0x%x, %d)", 
-                        motor_status, config.can_id, config.velocity_p);
+    if (motor_status != Ti5RobotCRADriverStatus::SUCCESS) 
+    {
+      RCLCPP_ERROR(logger_, "Error(%d) in calling motorDriver_->setVelocityP(0x%x, %d)", motor_status, config.can_id, config.velocity_p);
       return CallbackReturn::ERROR;
     }
 
     motor_status = motorDriver_->setVelocityI(config.can_id, config.velocity_i);
-    if (motor_status != Ti5RobotCRADriverStatus::SUCCESS) {
-      RCLCPP_ERROR(logger_, "Error(%d) in calling motorDriver_->velocity_i(0x%x, %d)", 
-                        motor_status, config.can_id, config.velocity_i);
+    if (motor_status != Ti5RobotCRADriverStatus::SUCCESS) 
+    {
+      RCLCPP_ERROR(logger_, "Error(%d) in calling motorDriver_->velocity_i(0x%x, %d)", motor_status, config.can_id, config.velocity_i);
       return CallbackReturn::ERROR;
     }
 
     motor_status = motorDriver_->setMaxCurrent(config.can_id, config.max_current);
     if (motor_status != Ti5RobotCRADriverStatus::SUCCESS) {
-      RCLCPP_ERROR(logger_, "Error(%d) in calling motorDriver_->setMaxCurrent(0x%x, %d)", 
-                        motor_status, config.can_id, config.max_current);
+      RCLCPP_ERROR(logger_, "Error(%d) in calling motorDriver_->setMaxCurrent(0x%x, %d)", motor_status, config.can_id, config.max_current);
       return CallbackReturn::ERROR;
     }
 
     motor_status = motorDriver_->setMinCurrent(config.can_id, config.min_current);
-    if (motor_status != Ti5RobotCRADriverStatus::SUCCESS) {
-      RCLCPP_ERROR(logger_, "Error(%d) in calling motorDriver_->setMinCurrent(0x%x, %d)", 
-                        motor_status, config.can_id, config.min_current);
+    if (motor_status != Ti5RobotCRADriverStatus::SUCCESS) 
+    {
+      RCLCPP_ERROR(logger_, "Error(%d) in calling motorDriver_->setMinCurrent(0x%x, %d)", motor_status, config.can_id, config.min_current);
       return CallbackReturn::ERROR;
     }
 
-    int32_t converted_max_velocity = velocity_inverse_convention(config.max_velocity, i);
-    int32_t converted_min_velocity = velocity_inverse_convention(config.min_velocity, i);
+    const int32_t converted_max_velocity = velocity_inverse_convention(config.max_velocity, i);
+    const int32_t converted_min_velocity = velocity_inverse_convention(config.min_velocity, i);
 
     motor_status = motorDriver_->setMaxVelocity(config.can_id, converted_max_velocity);
-    if (motor_status != Ti5RobotCRADriverStatus::SUCCESS) {
-      RCLCPP_ERROR(logger_, "Error(%d) in calling motorDriver_->setMaxVelocity(0x%x, 0x%08x)", 
-                  motor_status, config.can_id, converted_max_velocity);
+    if (motor_status != Ti5RobotCRADriverStatus::SUCCESS) 
+    {
+      RCLCPP_ERROR(logger_, "Error(%d) in calling motorDriver_->setMaxVelocity(0x%x, 0x%08x)", motor_status, config.can_id, converted_max_velocity);
       return CallbackReturn::ERROR;
     }
 
     motor_status = motorDriver_->setMinVelocity(config.can_id, converted_min_velocity);
-    if (motor_status != Ti5RobotCRADriverStatus::SUCCESS) {
-      RCLCPP_ERROR(logger_, "Error(%d) in calling motorDriver_->setMinVelocity(0x%x, 0x%08x)", 
-                  motor_status, config.can_id, converted_min_velocity);
+    if (motor_status != Ti5RobotCRADriverStatus::SUCCESS) 
+    {
+      RCLCPP_ERROR(logger_, "Error(%d) in calling motorDriver_->setMinVelocity(0x%x, 0x%08x)", motor_status, config.can_id, converted_min_velocity);
       return CallbackReturn::ERROR;
     }
 
     motor_status = motorDriver_->setPositionOffset(config.can_id, config.position_offset);
-    if (motor_status != Ti5RobotCRADriverStatus::SUCCESS) {
-      RCLCPP_ERROR(logger_, "Error(%d) in calling motorDriver_->setPositionOffset(0x%x, 0x%08x)", 
-                    motor_status, config.can_id, config.position_offset);
+    if (motor_status != Ti5RobotCRADriverStatus::SUCCESS) 
+    {
+      RCLCPP_ERROR(logger_, "Error(%d) in calling motorDriver_->setPositionOffset(0x%x, 0x%08x)", motor_status, config.can_id, config.position_offset);
       return CallbackReturn::ERROR;
     }
   }
 
   RCLCPP_INFO(logger_, "Successfully configured %zu motors", motor_configs_.size());
-
   return CallbackReturn::SUCCESS;
 }
 
 hardware_interface::CallbackReturn
 FoldElevatorHardwareInterface::on_activate(const rclcpp_lifecycle::State& /* previous_state */)
 {
-  if (activated_) {
+  if (activated_.load()) 
+  {
     RCLCPP_FATAL(logger_, "Double on_activate()");
     return CallbackReturn::ERROR;
   }
 
-  for (size_t i = 0; i < motor_configs_.size(); ++i) {
+  for (size_t i = 0; i < motor_configs_.size(); ++i) 
+  {
     const auto& config = motor_configs_[i];
     Ti5RobotCRADriverStatus motor_status;
     int32_t value = 0;
 
     motor_status = motorDriver_->getPosition(config.can_id, value);
-    if (motor_status != Ti5RobotCRADriverStatus::SUCCESS) {
+    if (motor_status != Ti5RobotCRADriverStatus::SUCCESS) 
+    {
       RCLCPP_ERROR(logger_, "Error (%d) in calling motorDriver_->getPosition(0x%x, 0x%08x)", motor_status, config.can_id, value);
       return CallbackReturn::ERROR;
     }
@@ -234,13 +277,13 @@ FoldElevatorHardwareInterface::on_activate(const rclcpp_lifecycle::State& /* pre
     // }    
 
     hw_position_commands_[i] = tmp;
-
-    // std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
   }
 
   RCLCPP_INFO(logger_, "Successfully activated!");
 
-  activated_ = true;
+  first_read_pass_.store(true);
+  activated_.store(true);
   return CallbackReturn::SUCCESS;
 }
 
@@ -248,11 +291,12 @@ hardware_interface::CallbackReturn
 FoldElevatorHardwareInterface::on_deactivate(const rclcpp_lifecycle::State& /* previous_state*/)
 {
   // 停止所有电机
-  for (const auto& config : motor_configs_) {
+  for (const auto& config : motor_configs_) 
+  {
     motorDriver_->deactivate(config.can_id);
   }
 
-  activated_ = false;
+  activated_.store(false);
   RCLCPP_INFO(logger_, "Successfully deactivated!");
 
   return CallbackReturn::SUCCESS;
@@ -280,18 +324,19 @@ FoldElevatorHardwareInterface::export_state_interfaces()
 {
   std::vector<hardware_interface::StateInterface> state_interfaces;
   
-  for (const auto& joint : info_.joints) {
+  for (const auto& joint : info_.joints) 
+  {
     size_t index = joint_indices_.at(joint.name);
     
     // 检查并添加位置状态接口
-    for (const auto& state_if : joint.state_interfaces) {
-      if (state_if.name == hardware_interface::HW_IF_POSITION) {
+    for (const auto& state_if : joint.state_interfaces) 
+    {
+      if (state_if.name == hardware_interface::HW_IF_POSITION) 
         state_interfaces.emplace_back(joint.name, hardware_interface::HW_IF_POSITION, &hw_position_states_[index]);
-      } else if (state_if.name == hardware_interface::HW_IF_VELOCITY) {
+      else if (state_if.name == hardware_interface::HW_IF_VELOCITY) 
         state_interfaces.emplace_back(joint.name, hardware_interface::HW_IF_VELOCITY, &hw_velocity_states_[index]);
-      } else if (state_if.name == hardware_interface::HW_IF_EFFORT) {
+      else if (state_if.name == hardware_interface::HW_IF_EFFORT) 
         state_interfaces.emplace_back(joint.name, hardware_interface::HW_IF_EFFORT, &hw_effort_states_[index]);
-      }
     }
   }
 
@@ -303,16 +348,17 @@ FoldElevatorHardwareInterface::export_command_interfaces()
 {
   std::vector<hardware_interface::CommandInterface> command_interfaces;
   
-  for (const auto& joint : info_.joints) {
+  for (const auto& joint : info_.joints) 
+  {
     size_t index = joint_indices_.at(joint.name);
-    for (const auto& cmd_if : joint.command_interfaces) {
-      if (cmd_if.name == hardware_interface::HW_IF_POSITION) {
+    for (const auto& cmd_if : joint.command_interfaces) 
+    {
+      if (cmd_if.name == hardware_interface::HW_IF_POSITION) 
         command_interfaces.emplace_back(joint.name, hardware_interface::HW_IF_POSITION, &hw_position_commands_[index]);
-      } else if (cmd_if.name == hardware_interface::HW_IF_VELOCITY) {
+      else if (cmd_if.name == hardware_interface::HW_IF_VELOCITY)
         command_interfaces.emplace_back(joint.name, hardware_interface::HW_IF_VELOCITY, &hw_velocity_commands_[index]);
-      } else if (cmd_if.name == hardware_interface::HW_IF_EFFORT) {
+      else if (cmd_if.name == hardware_interface::HW_IF_EFFORT)
         command_interfaces.emplace_back(joint.name, hardware_interface::HW_IF_EFFORT, &hw_effort_commands_[index]);
-      }
     }
   }
 
@@ -320,20 +366,22 @@ FoldElevatorHardwareInterface::export_command_interfaces()
 }
 
 hardware_interface::return_type 
-FoldElevatorHardwareInterface::read(const rclcpp::Time& /* time */, const rclcpp::Duration& /* period */)
+FoldElevatorHardwareInterface::read(const rclcpp::Time& time, const rclcpp::Duration& /* period */)
 {
-  if (!activated_)
+  if (!activated_.load())
     return hardware_interface::return_type::OK;
 
   int can_error = 0;
-   
-  for (const auto& joint : info_.joints) {
+  
+  for (const auto& joint : info_.joints) 
+  {
     size_t index = joint_indices_.at(joint.name);
-    uint8_t can_id = motor_configs_[index].can_id;
+    const uint8_t can_id = motor_configs_[index].can_id;
 
     int32_t value = 0;
     Ti5RobotCRADriverStatus motor_status = motorDriver_->getPosition(can_id, value);
-    if (motor_status != Ti5RobotCRADriverStatus::SUCCESS) {
+    if (motor_status != Ti5RobotCRADriverStatus::SUCCESS) 
+    {
       RCLCPP_ERROR(logger_, "Error (%d) in calling motorDriver_->getPosition(0x%x, 0x%08x)", motor_status, can_id, value);
       can_error = 1;
       break;
@@ -343,6 +391,97 @@ FoldElevatorHardwareInterface::read(const rclcpp::Time& /* time */, const rclcpp
 
     hw_position_states_[index] = tmp;
     update_motor_state(index, can_id, tmp);
+
+    if (status_pubs_[can_id] && status_pubs_[can_id]->get_subscription_count() > 0)
+    {
+      MotorStatusMsg status_msg;
+      status_msg.position = value;
+
+      value = 0;
+      motor_status = motorDriver_->getVelocity(can_id, value);
+      if (motor_status != Ti5RobotCRADriverStatus::SUCCESS) 
+      {
+        RCLCPP_ERROR(logger_, "Error (%d) in calling motorDriver_->getVelocity(0x%x)", motor_status, can_id);
+        can_error = 1;
+        break;
+      } 
+      status_msg.velocity = velocity_convention(static_cast<float>(value), index);
+      
+      value = 0;
+      motor_status = motorDriver_->getCurrent(can_id, value);
+      if (motor_status != Ti5RobotCRADriverStatus::SUCCESS) 
+      {
+        RCLCPP_ERROR(logger_, "Error (%d) in calling motorDriver_->getCurrent(0x%x)", motor_status, can_id);
+        can_error = 1;
+        break;
+      } 
+      status_msg.current = static_cast<float>(value) / 1000.0f;
+
+      if (supports_position_command_[index] && !std::isnan(hw_position_commands_[index])) 
+      {
+        status_msg.position_cmd = position_inverse_convention(hw_position_commands_[index]);
+      }
+      // status_msg.velocity_cmd = hw_velocity_commands_[index];
+      // status_msg.current_cmd = hw_effort_commands_[index];
+
+      status_pubs_[can_id]->publish(status_msg);
+      RCLCPP_DEBUG_THROTTLE(logger_, *node_->get_clock(), 10000, "Publishing motor status (CAN ID: 0x%x)", can_id);
+    }
+
+    if ((time - last_read_time_ ) > desired_config_update_period_)
+    {
+      if (config_pubs_[can_id] && config_pubs_[can_id]->get_subscription_count() > 0)
+      {
+        int32_t position_p = 0, position_i = 0, position_d = 0;
+        int32_t velocity_p = 0, velocity_i = 0, velocity_d = 0;
+        int32_t current_p  = 0, current_i  = 0, current_d  = 0;
+        int32_t motor_temperature  = 0, board_temperature  = 0;
+
+        READ_PID(getPositionP, position_p);
+        READ_PID(getPositionI, position_i);
+        READ_PID(getPositionD, position_d);
+        READ_PID(getVelocityP, velocity_p);
+        READ_PID(getVelocityI, velocity_i);
+        READ_PID(getVelocityD, velocity_d);
+        // READ_PID(getCurrentP,  current_p);
+        // READ_PID(getCurrentI,  current_i);
+        // READ_PID(getCurrentD,  current_d);
+        READ_PID(getMotorTemperature, motor_temperature);
+        READ_PID(getBoardTemperature, board_temperature);
+
+        if (!can_error) 
+        {
+          MotorConfigMsg config_msg;
+          config_msg.position_p = position_p;
+          config_msg.position_i = position_i;
+          config_msg.position_d = position_d;
+
+          config_msg.velocity_p = velocity_p & 0x7FF;
+          config_msg.velocity_i = velocity_i & 0x7FF;
+          config_msg.velocity_d = velocity_d & 0x7FF;
+
+          config_msg.current_p  = current_p;
+          config_msg.current_i  = current_i;
+          config_msg.current_d  = current_d;
+          
+          config_msg.motor_temperature  = motor_temperature;
+          config_msg.board_temperature  = board_temperature;
+
+          config_pubs_[can_id]->publish(config_msg);
+          RCLCPP_INFO_THROTTLE(logger_, *node_->get_clock(), 30000, "Publishing motor config (CAN ID: 0x%x)", can_id);
+        }
+        else
+        {
+          RCLCPP_ERROR(logger_, "get motor config error (CAN ID: 0x%x)", can_id);
+        }
+      }
+    }
+  }
+
+  // Update last_read_time_ after processing ALL joints
+  if ((time - last_read_time_) > desired_config_update_period_)
+  {
+    last_read_time_ = time;
   }
 
   return (!can_error ? hardware_interface::return_type::OK : hardware_interface::return_type::ERROR);
@@ -351,15 +490,12 @@ FoldElevatorHardwareInterface::read(const rclcpp::Time& /* time */, const rclcpp
 hardware_interface::return_type 
 FoldElevatorHardwareInterface::write(const rclcpp::Time& /* time */, const rclcpp::Duration& /* period */)
 {
-  if (!activated_) 
+  if (!activated_.load()) 
     return hardware_interface::return_type::OK;
 
-  {
-    std::lock_guard<std::mutex> lock(halt_mutex_);
-    if (!action_command_)
-      return hardware_interface::return_type::OK;
-  }
-
+  if (!action_command_.load())
+    return hardware_interface::return_type::OK;
+  
   int can_error = 0;
   
   for (const auto& joint : info_.joints) {
@@ -391,6 +527,9 @@ FoldElevatorHardwareInterface::write(const rclcpp::Time& /* time */, const rclcp
 
 void FoldElevatorHardwareInterface::lock_status_pub_cb(void)
 {
+  if (!lock_status_pub_ || lock_status_pub_->get_subscription_count() == 0)
+    return;
+
   std_msgs::msg::UInt8 msg;
   msg.data = 0;
   
@@ -417,10 +556,10 @@ void FoldElevatorHardwareInterface::lock_status_pub_cb(void)
 
 void FoldElevatorHardwareInterface::auto_halt_cb(void)
 {
-  std::lock_guard<std::mutex> lock(halt_mutex_);
-
-  if (!action_command_)
+  if (!action_command_.load())
     return;
+
+  std::lock_guard<std::mutex> lock(halt_mutex_);
 
   RCLCPP_DEBUG(logger_, "Try to lock motor now");
 
@@ -456,7 +595,7 @@ void FoldElevatorHardwareInterface::auto_halt_cb(void)
   }
 
   if (all_locked) {
-    action_command_ = false;
+    action_command_.store(false);
     RCLCPP_ERROR(logger_, "All motors are locked");
   }
 
@@ -469,26 +608,26 @@ void FoldElevatorHardwareInterface::action_command_cb(
   const std::shared_ptr<SetBool::Request> request, 
   std::shared_ptr<SetBool::Response> response)
 {
-  {
-    std::lock_guard<std::mutex> lock(halt_mutex_);
-    action_command_ = request->data; // always to assign true to action_command_
-  }
-
+  action_command_.store(request->data); // always to assign true to action_command_
+  
   response->success = true;
 
   if (request->data)
   {
     // for (const auto& joint : info_.joints) {
-    for (auto it = info_.joints.rbegin(); it != info_.joints.rend(); ++it) {
+    for (auto it = info_.joints.rbegin(); it != info_.joints.rend(); ++it) 
+    {
       const int index = joint_indices_.at(it->name);
 
-      if (supports_position_command_[index] && !std::isnan(hw_position_commands_[index])) {
+      if (supports_position_command_[index] && !std::isnan(hw_position_commands_[index])) 
+      {
         // 位置控制模式
         const uint8_t can_id = motor_configs_[index].can_id;
         const int32_t value = position_inverse_convention(hw_position_commands_[index]);
 
         Ti5RobotCRADriverStatus motor_status = motorDriver_->setTargetPosition(can_id, value);
-        if (motor_status != Ti5RobotCRADriverStatus::SUCCESS) {
+        if (motor_status != Ti5RobotCRADriverStatus::SUCCESS) 
+        {
           RCLCPP_ERROR(logger_, "Error (%d) in calling motorDriver_->setTargetPosition(0x%x, 0x%08x)", motor_status, can_id, value);
         }
         else
@@ -504,20 +643,78 @@ void FoldElevatorHardwareInterface::action_command_cb(
   }
   else
   {
-    for (const auto& joint : info_.joints) {
+    for (const auto& joint : info_.joints) 
+    {
       const int index = joint_indices_.at(joint.name);
       const uint8_t can_id = motor_configs_[index].can_id;
 
       Ti5RobotCRADriverStatus motor_status = motorDriver_->deactivate(can_id);
 
-      if (motor_status == Ti5RobotCRADriverStatus::SUCCESS) {
+      if (motor_status == Ti5RobotCRADriverStatus::SUCCESS) 
+      {
         std::lock_guard<std::mutex> lock(halt_mutex_);
         lock_status_[index] = LockState::LOCKED;
         RCLCPP_WARN(logger_, "Successfully locked motor 0x%x", can_id);
-      } else {
+      } 
+      else 
+      {
         RCLCPP_ERROR(logger_, "Error (%d) in calling motorDriver_->deactivate(0x%x,)", motor_status, can_id);
       }
     } 
+  }
+}
+
+void FoldElevatorHardwareInterface::set_pid_cb(
+  const std::shared_ptr<PidSrv::Request> request, 
+  std::shared_ptr<PidSrv::Response> response,
+  uint8_t can_id,
+  std::string key)
+{
+  Ti5RobotCRADriverStatus motor_status = Ti5RobotCRADriverStatus::SUCCESS;
+
+  if (key == "position_p")
+  {
+    motor_status = motorDriver_->setPositionP(can_id, request->value);
+    if (motor_status != Ti5RobotCRADriverStatus::SUCCESS) 
+    {
+      RCLCPP_ERROR(logger_, "Error(%d) in calling motorDriver_->setPositionP(0x%x, %d)", motor_status, can_id, request->value);
+      response->message = "Not okay";
+    }
+    response->success = true;
+  }
+  else if (key == "position_d")
+  {
+    motor_status = motorDriver_->setPositionD(can_id, request->value);
+    if (motor_status != Ti5RobotCRADriverStatus::SUCCESS) 
+    {
+      RCLCPP_ERROR(logger_, "Error(%d) in calling motorDriver_->setPositionD(0x%x, %d)", motor_status, can_id, request->value);
+      response->message = "Not okay";
+    }
+    response->success = true;
+  }
+  else if (key == "velocity_p")
+  {
+    motor_status = motorDriver_->setVelocityP(can_id, request->value);
+    if (motor_status != Ti5RobotCRADriverStatus::SUCCESS) 
+    {
+      RCLCPP_ERROR(logger_, "Error(%d) in calling motorDriver_->setVelocityP(0x%x, %d)", motor_status, can_id, request->value);
+      response->message = "Not okay";
+    }
+    response->success = true;
+  }
+  else if (key == "velocity_i")
+  {
+    motor_status = motorDriver_->setVelocityI(can_id, request->value);
+    if (motor_status != Ti5RobotCRADriverStatus::SUCCESS) 
+    {
+      RCLCPP_ERROR(logger_, "Error(%d) in calling motorDriver_->setVelocityI(0x%x, %d)", motor_status, can_id, request->value);
+      response->message = "Not okay";
+    }
+    response->success = true;
+  }
+  else
+  {
+    response->message = "The type does not supported.";
   }
 }
 

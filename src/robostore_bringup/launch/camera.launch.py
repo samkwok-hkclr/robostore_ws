@@ -24,7 +24,7 @@ left_camera_params = {
     "initial_reset": True,
 
     "enable_color": True,
-    "rgb_camera.color_profile": "1280,720,6",
+    "rgb_camera.color_profile": "1280,720,30",
     "rgb_camera.color_format": "RGB8",
     "rgb_camera.enable_auto_exposure": True,
     "rgb_camera.power_line_frequency": 1,
@@ -33,7 +33,7 @@ left_camera_params = {
     # "hdr_merge": True,
 
     "enable_depth": True,
-    "depth_module.depth_profile": "1280,720,6",
+    "depth_module.depth_profile": "1280,720,30",
     "depth_module.depth_format": "Z16",
     # "depth_module.hdr_enabled": True,
     "depth_module.min_distance": 190,
@@ -95,7 +95,7 @@ right_camera_params = {
     "initial_reset": True,
 
     "enable_color": True,
-    "rgb_camera.color_profile": "1280,720,6",
+    "rgb_camera.color_profile": "1280,720,30",
     "rgb_camera.color_format": "RGB8",
     "rgb_camera.enable_auto_exposure": True,
     "rgb_camera.power_line_frequency": 1,
@@ -104,7 +104,7 @@ right_camera_params = {
     # "hdr_merge": True,
 
     "enable_depth": True,
-    "depth_module.depth_profile": "1280,720,6",
+    "depth_module.depth_profile": "1280,720,30",
     "depth_module.depth_format": "Z16",
     # "depth_module.hdr_enabled": True,
     "depth_module.min_distance": 190,
@@ -157,16 +157,6 @@ right_camera_params = {
     "wait_for_device_timeout": -1.0,
     "reconnect_timeout": 3.0,
 }
-
-def declare_configurable_parameters(parameters):
-    return [DeclareLaunchArgument(param['name'], default_value=param['default'], description=param['description']) for param in parameters]
-
-def set_configurable_parameters(parameters):
-    return dict([(param['name'], LaunchConfiguration(param['name'])) for param in parameters])
-
-def yaml_to_dict(path_to_yaml):
-    with open(path_to_yaml, "r") as f:
-        return yaml.load(f, Loader=yaml.SafeLoader)
 
 def generate_launch_description():
     ld = LaunchDescription()

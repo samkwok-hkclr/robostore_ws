@@ -188,13 +188,13 @@ Ti5RobotCRADriverStatus Ti5RobotCRADriver::setTargetCurrent(uint32_t can_id, int
 
 Ti5RobotCRADriverStatus Ti5RobotCRADriver::getPosition(uint32_t can_id, int32_t& value)
 {
-    Ti5RobotCRADriverStatus status;
+  Ti5RobotCRADriverStatus status;
 
-    // RCLCPP_INFO(rclcpp::get_logger("Ti5RobotCRADriver"), "getPosition(0x%x, 0x%08x)", can_id, value);
-    status = sendRecvCanData(can_id, MotorCommand::GET_POSITION, value);
-    // RCLCPP_INFO(rclcpp::get_logger("Ti5RobotCRADriver"), "getPosition(0x%x)--->%08x", can_id, value);
+  // RCLCPP_INFO(rclcpp::get_logger("Ti5RobotCRADriver"), "getPosition(0x%x, 0x%08x)", can_id, value);
+  status = sendRecvCanData(can_id, MotorCommand::GET_POSITION, value);
+  // RCLCPP_INFO(rclcpp::get_logger("Ti5RobotCRADriver"), "getPosition(0x%x)--->%08x", can_id, value);
 
-    return status;
+  return status;
 }
 
 Ti5RobotCRADriverStatus Ti5RobotCRADriver::getVelocity(uint32_t can_id, int32_t& value)
@@ -207,16 +207,134 @@ Ti5RobotCRADriverStatus Ti5RobotCRADriver::getCurrent(uint32_t can_id, int32_t& 
     return sendRecvCanData(can_id, MotorCommand::GET_CURRENT, value);
 }
 
+Ti5RobotCRADriverStatus Ti5RobotCRADriver::getPositionP(uint32_t can_id, int32_t& value)
+{
+  return sendRecvCanData(can_id, MotorCommand::GET_POSITION_P, value);
+  // int32_t tmp;
+  // Ti5RobotCRADriverStatus status = sendRecvCanData(can_id, MotorCommand::GET_POSITION_P, tmp);
+
+  // if (status == Ti5RobotCRADriverStatus::SUCCESS)
+  //   value = tmp & 0x7FF;
+
+  // return status;
+}
+
+Ti5RobotCRADriverStatus Ti5RobotCRADriver::getPositionI(uint32_t can_id, int32_t& value)
+{
+  return sendRecvCanData(can_id, MotorCommand::GET_POSITION_I, value);
+  // int32_t tmp;
+  // Ti5RobotCRADriverStatus status = sendRecvCanData(can_id, MotorCommand::GET_POSITION_I, tmp);
+
+  // if (status == Ti5RobotCRADriverStatus::SUCCESS)
+  //   value = tmp & 0x7FF;
+
+  // return status;
+}
+
+Ti5RobotCRADriverStatus Ti5RobotCRADriver::getPositionD(uint32_t can_id, int32_t& value)
+{
+  return sendRecvCanData(can_id, MotorCommand::GET_POSITION_D, value);
+  // int32_t tmp;
+  // Ti5RobotCRADriverStatus status = sendRecvCanData(can_id, MotorCommand::GET_POSITION_D, tmp);
+
+  // if (status == Ti5RobotCRADriverStatus::SUCCESS)
+  //   value = tmp & 0x7FF;
+
+  // return status;
+}
+
+Ti5RobotCRADriverStatus Ti5RobotCRADriver::getVelocityP(uint32_t can_id, int32_t& value)
+{
+  return sendRecvCanData(can_id, MotorCommand::GET_VELOCITY_P, value);
+  // int32_t tmp;
+  // Ti5RobotCRADriverStatus status = sendRecvCanData(can_id, MotorCommand::GET_VELOCITY_P, tmp);
+
+  // if (status == Ti5RobotCRADriverStatus::SUCCESS)
+  //   value = tmp & 0x7FF;
+
+  // return status;
+}
+
+Ti5RobotCRADriverStatus Ti5RobotCRADriver::getVelocityI(uint32_t can_id, int32_t& value)
+{
+  return sendRecvCanData(can_id, MotorCommand::GET_VELOCITY_I, value);
+  // int32_t tmp;
+  // Ti5RobotCRADriverStatus status = sendRecvCanData(can_id, MotorCommand::GET_VELOCITY_I, tmp);
+
+  // if (status == Ti5RobotCRADriverStatus::SUCCESS)
+  //   value = tmp & 0x7FF;
+
+  // return status;
+}
+
+Ti5RobotCRADriverStatus Ti5RobotCRADriver::getVelocityD(uint32_t can_id, int32_t& value)
+{
+  return sendRecvCanData(can_id, MotorCommand::GET_VELOCITY_D, value);
+  // int32_t tmp;
+  // Ti5RobotCRADriverStatus status = sendRecvCanData(can_id, MotorCommand::GET_VELOCITY_D, tmp);
+
+  // if (status == Ti5RobotCRADriverStatus::SUCCESS)
+  //   value = tmp & 0x7FF;
+
+  // return status;
+}
+
+Ti5RobotCRADriverStatus Ti5RobotCRADriver::getCurrentP(uint32_t can_id, int32_t& value)
+{
+  return sendRecvCanData(can_id, MotorCommand::GET_CURRENT_P, value);
+  // int32_t tmp;
+  // Ti5RobotCRADriverStatus status = sendRecvCanData(can_id, MotorCommand::GET_CURRENT_P, tmp);
+
+  // if (status == Ti5RobotCRADriverStatus::SUCCESS)
+  //   value = tmp & 0x7FF;
+
+  // return status;
+}
+
+Ti5RobotCRADriverStatus Ti5RobotCRADriver::getCurrentI(uint32_t can_id, int32_t& value)
+{
+  return sendRecvCanData(can_id, MotorCommand::GET_CURRENT_I, value);
+  // int32_t tmp;
+  // Ti5RobotCRADriverStatus status = sendRecvCanData(can_id, MotorCommand::GET_CURRENT_I, tmp);
+
+  // if (status == Ti5RobotCRADriverStatus::SUCCESS)
+  //   value = tmp & 0x7FF;
+
+  // return status;
+}
+
+Ti5RobotCRADriverStatus Ti5RobotCRADriver::getCurrentD(uint32_t can_id, int32_t& value)
+{
+  return sendRecvCanData(can_id, MotorCommand::GET_CURRENT_D, value);
+  // int32_t tmp;
+  // Ti5RobotCRADriverStatus status = sendRecvCanData(can_id, MotorCommand::GET_CURRENT_D, tmp);
+
+  // if (status == Ti5RobotCRADriverStatus::SUCCESS)
+  //   value = tmp & 0x7FF;
+
+  // return status;
+}
+
+Ti5RobotCRADriverStatus Ti5RobotCRADriver::getMotorTemperature(uint32_t can_id, int32_t& value)
+{
+    return sendRecvCanData(can_id, MotorCommand::GET_MOTOR_TEMP, value);
+}
+
+Ti5RobotCRADriverStatus Ti5RobotCRADriver::getBoardTemperature(uint32_t can_id, int32_t& value)
+{
+    return sendRecvCanData(can_id, MotorCommand::GET_BOARD_TEMP, value);
+}
+
 Ti5RobotCRADriverStatus Ti5RobotCRADriver::sendRecvCanData(uint32_t can_id, uint8_t cmd, int32_t& ret)
 {
-    Ti5RobotCRADriverStatus status;
+  Ti5RobotCRADriverStatus status;
 
-    status = sendCanData(can_id, cmd, ret);
-    if (status != Ti5RobotCRADriverStatus::SUCCESS) {
-        return status;
-    }
+  status = sendCanData(can_id, cmd, ret);
+  if (status != Ti5RobotCRADriverStatus::SUCCESS) {
+      return status;
+  }
 
-    return recvCanData(can_id, cmd, ret);
+  return recvCanData(can_id, cmd, ret);
 }
 
 Ti5RobotCRADriverStatus Ti5RobotCRADriver::sendCanData(uint32_t can_id, uint8_t cmd, int32_t value)
@@ -231,14 +349,26 @@ Ti5RobotCRADriverStatus Ti5RobotCRADriver::sendCanData(uint32_t can_id, uint8_t 
         cmd == MotorCommand::CLEAR_ERRORS ||
         cmd == MotorCommand::GET_POSITION ||
         cmd == MotorCommand::GET_VELOCITY ||
-        cmd == MotorCommand::GET_CURRENT) {
-        dlen = 1;
+        cmd == MotorCommand::GET_CURRENT ||
+        cmd == MotorCommand::GET_POSITION_P ||
+        cmd == MotorCommand::GET_POSITION_I ||
+        cmd == MotorCommand::GET_POSITION_D ||
+        cmd == MotorCommand::GET_VELOCITY_P ||
+        cmd == MotorCommand::GET_VELOCITY_I ||
+        cmd == MotorCommand::GET_VELOCITY_D ||
+        cmd == MotorCommand::GET_CURRENT_P ||
+        cmd == MotorCommand::GET_CURRENT_I ||
+        cmd == MotorCommand::GET_CURRENT_D ||
+        cmd == MotorCommand::GET_MOTOR_TEMP ||
+        cmd == MotorCommand::GET_BOARD_TEMP) 
+    {
+      dlen = 1;
     } else {
-        data[1] = static_cast<uint8_t>(value & 0xFF);
-        data[2] = static_cast<uint8_t>((value >> 8) & 0xFF);
-        data[3] = static_cast<uint8_t>((value >> 16) & 0xFF);
-        data[4] = static_cast<uint8_t>((value >> 24) & 0xFF);
-        dlen = 5;
+      data[1] = static_cast<uint8_t>(value & 0xFF);
+      data[2] = static_cast<uint8_t>((value >> 8) & 0xFF);
+      data[3] = static_cast<uint8_t>((value >> 16) & 0xFF);
+      data[4] = static_cast<uint8_t>((value >> 24) & 0xFF);
+      dlen = 5;
     }
 
     try {

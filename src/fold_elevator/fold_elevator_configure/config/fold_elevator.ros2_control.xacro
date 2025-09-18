@@ -1,82 +1,86 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
-    <xacro:macro name="fold_elevator_ros2_control" params="name sim can_interface">
-        <ros2_control name="fold_elevator" type="system">
-            <hardware>
-                <xacro:if value="${sim}">
-                    <plugin>mock_components/GenericSystem</plugin>
-                </xacro:if>
-                <xacro:unless value="${sim}">
-                    <plugin>fold_elevator_hardware_interface/FoldElevatorHardwareInterface</plugin>
-                    <param name="can_interface">${can_interface}</param>
-                </xacro:unless>
-            </hardware>
+	<xacro:macro name="fold_elevator_ros2_control" params="name sim can_interface desired_config_update_rate">
+		<ros2_control name="fold_elevator" type="system">
+		<hardware>
+			<xacro:if value="${sim}">
+			<plugin>mock_components/GenericSystem</plugin>
+			</xacro:if>
+			<xacro:unless value="${sim}">
+			<plugin>fold_elevator_hardware_interface/FoldElevatorHardwareInterface</plugin>
+			<param name="can_interface">${can_interface}</param>
+			<param name="desired_config_update_rate">${desired_config_update_rate}</param>
+			</xacro:unless>
+		</hardware>
 
-            <joint name="joint1">
-                <command_interface name="position"/>
-                <state_interface name="position"/>
-                <state_interface name="velocity"/>
-                <param name="can_id">0x60</param>
-                <param name="gear_ratio">101.0</param>
-                <param name="position_offset">A0CC</param>  
-                <param name="max_current">22000</param>                
-                <param name="min_current">-22000</param>     
-                <param name="position_p">5000</param>     
-                <param name="position_d">450</param>     
-                <param name="velocity_p">550</param>     
-                <param name="velocity_i">250</param>  
-                <param name="max_velocity">1.0</param>                
-                <param name="min_velocity">-1.0</param>                 
-            </joint>
-            <joint name="joint2">
-                <command_interface name="position"/>
-                <state_interface name="position"/>
-                <state_interface name="velocity"/>
-                <param name="can_id">0x61</param>
-                <param name="gear_ratio">101.0</param>
-                <param name="position_offset">188D6</param>
-                <param name="max_current">22000</param>                
-                <param name="min_current">-22000</param>    
-                <param name="position_p">5000</param>     
-                <param name="position_d">450</param>  
-                <param name="velocity_p">550</param>     
-                <param name="velocity_i">250</param> 
-                <param name="max_velocity">1.0</param>                
-                <param name="min_velocity">-1.0</param>    
-            </joint>
-            <joint name="joint3">
-                <command_interface name="position"/>
-                <state_interface name="position"/>
-                <state_interface name="velocity"/>
-                <param name="can_id">0x62</param>
-                <param name="gear_ratio">101.0</param>
-                <param name="position_offset">8052</param>   
-                <param name="max_current">22000</param>                
-                <param name="min_current">-22000</param>  
-                <param name="position_p">4600</param>     
-                <param name="position_d">400</param>  
-                <param name="velocity_p">450</param>     
-                <param name="velocity_i">220</param> 
-                <param name="max_velocity">1.0</param>                
-                <param name="min_velocity">-1.0</param>                  
-            </joint>
-            <joint name="joint4">
-                <command_interface name="position"/>
-                <state_interface name="position"/>
-                <state_interface name="velocity"/>
-                <param name="can_id">0x63</param>
-                <param name="gear_ratio">121.0</param>
-                <param name="position_offset">28F7</param>                
-                <param name="max_current">13000</param>                
-                <param name="min_current">-13000</param>   
-                <param name="position_p">5200</param>     
-                <param name="position_d">500</param>   
-                <param name="velocity_p">1250</param>     
-                <param name="velocity_i">1500</param>   
-                <param name="max_velocity">10.0</param>                
-                <param name="min_velocity">-10.0</param>              
-            </joint>
+		<joint name="joint1">
+			<command_interface name="position"/>
+			<state_interface name="position"/>
+			<state_interface name="velocity"/>
+			<param name="can_id">0x60</param>
+			<param name="gear_ratio">101.0</param>
+			<param name="position_offset">A0CC</param>  
+			<param name="max_current">22000</param>                
+			<param name="min_current">-22000</param>     
+			<param name="position_p">5000</param>     
+			<param name="position_d">0</param>     
+			<param name="velocity_p">300</param>     
+			<param name="velocity_i">250</param> 
+			<param name="max_velocity">1.0</param>                
+			<param name="min_velocity">-1.0</param>                 
+		</joint>
 
-        </ros2_control>
-    </xacro:macro>
+		<joint name="joint2">
+			<command_interface name="position"/>
+			<state_interface name="position"/>
+			<state_interface name="velocity"/>
+			<param name="can_id">0x61</param>
+			<param name="gear_ratio">101.0</param>
+			<param name="position_offset">188D6</param>
+			<param name="max_current">22000</param>                
+			<param name="min_current">-22000</param>    
+			<param name="position_p">4000</param>     
+			<param name="position_d">0</param>  
+			<param name="velocity_p">90</param>     
+			<param name="velocity_i">200</param> 
+			<param name="max_velocity">1.0</param>                
+			<param name="min_velocity">-1.0</param>    
+		</joint>
+
+		<joint name="joint3">
+			<command_interface name="position"/>
+			<state_interface name="position"/>
+			<state_interface name="velocity"/>
+			<param name="can_id">0x62</param>
+			<param name="gear_ratio">101.0</param>
+			<param name="position_offset">8052</param>   
+			<param name="max_current">22000</param>                
+			<param name="min_current">-22000</param>  
+			<param name="position_p">4600</param>     
+			<param name="position_d">0</param>  
+			<param name="velocity_p">300</param>     
+			<param name="velocity_i">250</param> 
+			<param name="max_velocity">1.0</param>                
+			<param name="min_velocity">-1.0</param>                  
+		</joint>
+		
+		<joint name="joint4">
+			<command_interface name="position"/>
+			<state_interface name="position"/>
+			<state_interface name="velocity"/>
+			<param name="can_id">0x63</param>
+			<param name="gear_ratio">121.0</param>
+			<param name="position_offset">28F7</param>                
+			<param name="max_current">13000</param>                
+			<param name="min_current">-13000</param>   
+			<param name="position_p">5200</param>     
+			<param name="position_d">0</param>   
+			<param name="velocity_p">1250</param>     
+			<param name="velocity_i">1500</param>   
+			<param name="max_velocity">10.0</param>                
+			<param name="min_velocity">-10.0</param>              
+		</joint>
+
+		</ros2_control>
+	</xacro:macro>
 </robot>

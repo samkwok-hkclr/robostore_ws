@@ -20,6 +20,7 @@
 #include <rclcpp_lifecycle/state.hpp>
 
 #include <std_msgs/msg/u_int8.hpp>
+#include <std_msgs/msg/int32.hpp>
 #include <std_srvs/srv/trigger.hpp>
 #include <std_srvs/srv/set_bool.hpp>
 #include <can_msgs/msg/frame.hpp>
@@ -30,10 +31,25 @@
 
 #include "fold_elevator_hardware_interface/Ti5Robot_cra_driver.hpp"
 
+#include "fold_elevator_msgs/msg/motor_config.hpp" 
+#include "fold_elevator_msgs/msg/motor_status.hpp" 
+#include "fold_elevator_msgs/srv/pid.hpp" 
+
 using namespace std::chrono_literals;
 using std::placeholders::_1;
 using std::placeholders::_2;
 using std::placeholders::_3;
+
+#define READ_PID(GETTER, FIELD)                              \
+  value = 0;                                                 \
+  motor_status = motorDriver_->GETTER(can_id, value);        \
+  if (motor_status != Ti5RobotCRADriverStatus::SUCCESS) {    \
+    RCLCPP_ERROR(logger_, "Error (%d) in calling " #GETTER "(0x%x)", motor_status, can_id); \
+    can_error = true;                                        \
+  } else {                                                   \
+    FIELD = value;                                           \
+  }                                                          \
+  if (can_error) break;
 
 namespace fold_elevator_hardware_interface {
 
@@ -56,8 +72,13 @@ struct MotorConfig
 class FoldElevatorHardwareInterface : public hardware_interface::SystemInterface
 {
   using UInt8 = std_msgs::msg::UInt8;
+  using Int32 = std_msgs::msg::Int32;
   using Trigger = std_srvs::srv::Trigger;
   using SetBool = std_srvs::srv::SetBool;
+
+  using MotorConfigMsg = fold_elevator_msgs::msg::MotorConfig;
+  using MotorStatusMsg = fold_elevator_msgs::msg::MotorStatus;
+  using PidSrv = fold_elevator_msgs::srv::Pid;
 
 public:
   FoldElevatorHardwareInterface();
@@ -101,10 +122,25 @@ public:
   void action_command_cb(
     const std::shared_ptr<SetBool::Request> request, 
     std::shared_ptr<SetBool::Response> response);
+  void set_pid_cb(
+    const std::shared_ptr<PidSrv::Request> request, 
+    std::shared_ptr<PidSrv::Response> response,
+    uint8_t can_id,
+    std::string key);
 
 private:
   rclcpp::Logger logger_;
   std::atomic<bool> activated_;
+
+  rclcpp::CallbackGroup::SharedPtr srv_ser_cbg_;
+
+  std::atomic<bool> first_read_pass_;
+  rclcpp::Duration desired_config_update_period_;
+  rclcpp::Time last_read_time_;
+  
+  std::map<uint8_t, rclcpp::Publisher<MotorConfigMsg>::SharedPtr> config_pubs_;
+  std::map<uint8_t, rclcpp::Publisher<MotorStatusMsg>::SharedPtr> status_pubs_;
+  std::map<uint8_t, std::map<std::string, rclcpp::Service<PidSrv>::SharedPtr>> pid_srv_;
 
   std::atomic<bool> shutdown_requested_;
   std::shared_ptr<rclcpp::executors::SingleThreadedExecutor> executor_;
@@ -134,7 +170,7 @@ private:
   std::vector<double> running_sums_;
   std::vector<MotorState> position_status_;
   std::vector<LockState> lock_status_;
-  bool action_command_;
+  std::atomic<bool> action_command_;
   bool halt_timer_activated_;
   
   constexpr static float RAD_DIFF_THRESHOLD = 0.005f; // To be determine
@@ -162,6 +198,9 @@ private:
   int32_t position_inverse_convention(double val) const;
   double velocity_convention(int32_t val, size_t joint_index) const;
   int32_t velocity_inverse_convention(double val, size_t joint_index) const;
+
+  const std::vector<std::string> PID_TYPE{"position", "velocity", "current"};
+  const std::vector<std::string> PID{"p", "i", "d"};
   
 };  // class FoldElevatorHardwareInterface
 

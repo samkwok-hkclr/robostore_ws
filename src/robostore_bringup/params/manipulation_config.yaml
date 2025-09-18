@@ -1,6 +1,6 @@
 /**:
   ros__parameters:
-    sim: true
+    sim: false
 
 manager:
   ros__parameters:
@@ -13,8 +13,8 @@ action_planner:
     eef_offset: [0.0, 0.0, 0.0] # manual offset
     pre_obj_pose_shift: 0.1
     pre_place_pose_shift: 0.15
-    post_pick_lift_offset: 0.03
-    post_pick_back_offset: 0.15
+    post_pick_lift_offset: 0.02
+    post_pick_back_offset: 0.25
     post_place_down_offset: 0.01
 
 motion_planner:
@@ -27,11 +27,12 @@ motion_planner:
     left_home_joints: [0.6909, 1.3581, -1.2883, -1.8352, 0.0238, -0.4530, 0.3616]
     left_holding_joints: [-0.1290, 0.8766, -0.2334, -1.7444, 0.3358, 1.0115, 1.0033]
     left_action_joints: [-0.3649, 0.8048, -0.1931, -2.0853, 0.4905, 1.2842, 0.6162]
-    
+
     right_zero_joints: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
     right_home_joints: [-0.6909, 1.3581, 1.2883, -1.8352, 0.0238, -0.4530, -0.3616]
     right_holding_joints: [0.1290, 0.8766, 0.2334, -1.7444, -0.3358, 1.0115, -1.0033]
     right_action_joints: [0.3649, 0.8048, 0.1931, -2.0853, -0.4905, 1.2842, -0.6162]
+
     
 collision_planner:
   ros__parameters:
@@ -44,18 +45,16 @@ workflow_planner:
     max_pick_attempt: 2
     valid_z_threshold: 0.1 # filter invalid vision recognition result
     max_scan_attempt: 2
-    re_scan_translation: 0.05
+    re_scan_x_translation: 0.05
+    re_scan_y_translation: 0.1
     place_offset: 0.01
-    scan_distance: 0.20
+    scan_x_distance: 0.03
+    scan_z_distance: 0.26
     optimal_arm_flat_height_distance: 0.2
     table_front_offset: 0.6
     table_height_offset: 0.1
-    # 20250818
-    # eef_to_left_camera: [-0.11428286, 0.00178735, -0.05448768, -0.00511073, 0.01296962, 0.71294748, -0.70107886]
-    # 20250820
-    # eef_to_left_camera: [-0.11041817, -0.00236401, -0.03587768, -0.00683415, 0.00986319, 0.70991133, -0.70418883]
-    tcp_to_left_camera: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0]
-    tcp_to_right_camera: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0]
+    tcp_to_left_camera: [0.090, -0.032, -0.100, 0.02, -0.003, 0.707, 0.707]
+    tcp_to_right_camera: [0.090, -0.032, -0.116, 0.002, -0.003, 0.713, 0.702]
 
 fold_elevator_driver:
   ros__parameters:

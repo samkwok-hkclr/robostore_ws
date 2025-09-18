@@ -54,12 +54,15 @@ enum MotorCommand : uint8_t
   GET_ENCODER_STATUS    = 0x79,
 
   // PID Control Commands
-  GET_VELOCITY_P        = 0x10,
-  GET_VELOCITY_I        = 0x11,
-  GET_VELOCITY_D        = 0x33,
   GET_POSITION_P        = 0x12,
   GET_POSITION_I        = 0x34,
   GET_POSITION_D        = 0x13,
+  GET_VELOCITY_P        = 0x10,
+  GET_VELOCITY_I        = 0x11,
+  GET_VELOCITY_D        = 0x33,
+  GET_CURRENT_P         = 0x61,
+  GET_CURRENT_I         = 0x62,
+  GET_CURRENT_D         = 0x63,
 
   // Limit Settings Commands
   GET_MAX_CURRENT       = 0x37,
@@ -169,6 +172,19 @@ public:
   Ti5RobotCRADriverStatus getPosition(uint32_t can_id, int32_t& value);
   Ti5RobotCRADriverStatus getVelocity(uint32_t can_id, int32_t& value);
   Ti5RobotCRADriverStatus getCurrent(uint32_t can_id, int32_t& value);
+
+  Ti5RobotCRADriverStatus getPositionP(uint32_t can_id, int32_t& value);
+  Ti5RobotCRADriverStatus getPositionI(uint32_t can_id, int32_t& value);
+  Ti5RobotCRADriverStatus getPositionD(uint32_t can_id, int32_t& value);
+  Ti5RobotCRADriverStatus getVelocityP(uint32_t can_id, int32_t& value);
+  Ti5RobotCRADriverStatus getVelocityI(uint32_t can_id, int32_t& value);
+  Ti5RobotCRADriverStatus getVelocityD(uint32_t can_id, int32_t& value);
+  Ti5RobotCRADriverStatus getCurrentP(uint32_t can_id, int32_t& value);
+  Ti5RobotCRADriverStatus getCurrentI(uint32_t can_id, int32_t& value);
+  Ti5RobotCRADriverStatus getCurrentD(uint32_t can_id, int32_t& value);
+  
+  Ti5RobotCRADriverStatus getMotorTemperature(uint32_t can_id, int32_t& value);
+  Ti5RobotCRADriverStatus getBoardTemperature(uint32_t can_id, int32_t& value);
 
 private:
   Ti5RobotCRADriverStatus sendCanData(uint32_t can_id, uint8_t cmd, int32_t value = 0);
