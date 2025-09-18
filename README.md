@@ -26,7 +26,7 @@ rosdep install --from-paths src --ignore-src --rosdistro $ROS_DISTRO -r -y
 ### 3. Build the packages
 
 ```bash
-colcon build
+./colcon_build.bash
 ```
 
 ### 4. TBD
