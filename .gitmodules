@@ -2,3 +2,8 @@
 	path = src/external_libraries/realsense-ros
 	url = https://github.com/IntelRealSense/realsense-ros
 	branch = ros2-master
+
+[submodule "fold_elevator"]
+	path = src/fold_elevator
+	url = https://github.com/samkwok-hkclr/fold_elevator
+	branch = master
