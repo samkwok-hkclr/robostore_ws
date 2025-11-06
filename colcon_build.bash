@@ -4,13 +4,10 @@ REALSENSE_CAMERA=realsense2_camera
 
 REALSENSE_DESCRIPTION_MSGS_PKGS=$(colcon list -n | grep realsense2 | grep -v "^${REALSENSE_CAMERA}\$")
 
-ROS2_CANOPEN_PKGS=$(colcon list -n | grep canopen)
-LELY_CORE_PKG=lely_core_libraries
-
 colcon build \
   --packages-select $REALSENSE_DESCRIPTION_MSGS_PKGS \
   --cmake-args \
-  -DCMAKE_BUILD_TYPE=Releas
+  -DCMAKE_BUILD_TYPE=Release
 
 colcon build \
   --packages-select $REALSENSE_CAMERA \
