@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-* CAN Module w/ Linux SocketCAN installed.
+* ROS2 Humble
 * TBC...
 
 ## Installation
@@ -16,6 +16,8 @@ git clone --recurse-submodules https://github.com/samkwok-hkclr/robostore_ws
 ### 2. Install the Dependencies
 
 ```bash
+# ROS_PYTHON_VERSION=3
+# ROS_DISTRO=humble
 sudo rosdep init
 rosdep update
 rosdep install --from-paths src --ignore-src --rosdistro $ROS_DISTRO -r -y
@@ -31,4 +33,5 @@ colcon build
 
 ```bash
 # to be done
+
 ```
