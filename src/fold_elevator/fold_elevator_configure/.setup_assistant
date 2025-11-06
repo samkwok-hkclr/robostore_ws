@@ -1,0 +1,10 @@
+moveit_setup_assistant_config:
+  urdf:
+    package: fold_elevator_description
+    relative_path: urdf/fold_elevator.urdf
+  srdf:
+    relative_path: config/fold_elevator.srdf
+  package_settings:
+    author_name: lffang
+    author_email: lffang@hkclr.hk
+    generated_timestamp: 1759313813

@@ -1,66 +1,119 @@
+/**:
+  ros__parameters:
+    sim: true
+
+manager:
+  ros__parameters:
+    rotation_name: ["abs_back", "abs_front", "abs_left", "abs_right", "relative_back", "relative_left", "relative_right"]
+    arm_poses_name: ["home", "holding", "action"]
+
 action_planner:
   ros__parameters:
-    sim: false
+    # sim: false
     eef_offset: [0.0, 0.0, 0.0]
     pre_obj_pose_shift: 0.05
-    pre_place_pose_shift: 0.06
-    post_pick_lift_offset: 0.05 # 0.02
-    post_pick_back_offset: 0.2 # 0.1 
+    pre_place_pose_shift: 0.1
+    post_pick_lift_offset: 0.04 # 0.02
+    post_pick_back_offset: 0.1 # 0.1 
     post_place_down_offset: 0.01
 
 motion_planner:
   ros__parameters:
-    sim: false
+    # sim: false
+    enable_ultrasonic: false
     max_pick_attempt: 2
-    move_to_srv_names: ["home_pose", "middle_pose", "scan_pose", "pre_pick_pose", "pre_place_pose"]
-
+    left_zero_joints: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    left_home_joints: [0.6909, 1.3581, -1.2883, -1.8352, 0.0238, -0.4530, 0.3616]
+    left_holding_joints: [-0.1290, 0.8766, -0.2334, -1.7444, 0.3358, 1.0115, 1.0033]
+    left_action_joints: [-0.3649, 0.8048, -0.1931, -2.0853, 0.4905, 1.2842, 0.6162]
+    
+    right_zero_joints: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    right_home_joints: [-0.6909, 1.3581, 1.2883, -1.8352, 0.0238, -0.4530, -0.3616]
+    right_holding_joints: [0.1290, 0.8766, 0.2334, -1.7444, -0.3358, 1.0115, -1.0033]
+    right_action_joints: [0.3649, 0.8048, 0.1931, -2.0853, -0.4905, 1.2842, -0.6162]
+    
 collision_planner:
   ros__parameters:
-    sim: false
+    # sim: false
     import_from_file: true
 
 workflow_planner:
   ros__parameters:
-    max_pick_attampt: 2
+    # sim: false
+    max_pick_attempt: 2
     valid_z_threshold: 0.1 # filter invalid vision recognition result
     max_scan_attempt: 2
-    re_scan_translation: 0.02
+    re_scan_translation: 0.05
     place_offset: 0.01
+    scan_distance: 0.20
+    optimal_arm_flat_height_distance: 0.2
+    table_front_offset: 0.55
+    table_height_offset_: 0.1
     # 20250818
     # eef_to_left_camera: [-0.11428286, 0.00178735, -0.05448768, -0.00511073, 0.01296962, 0.71294748, -0.70107886]
     # 20250820
     # eef_to_left_camera: [-0.11041817, -0.00236401, -0.03587768, -0.00683415, 0.00986319, 0.70991133, -0.70418883]
-    eef_to_left_camera: [-0.11041817, 0.00236401, -0.04448768, -0.00683415, 0.00986319, 0.70991133, -0.70418883]
+    tcp_to_left_camera: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0]
+    tcp_to_right_camera: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0]
 
-vacuum_gripper_ctlr:
+fold_elevator_driver:
   ros__parameters:
-    sim: false
-    leak_threshold: -50000.0 # unit: Pa
-
-robot_controller:
-  ros__parameters:
-    group_name: arm # defined in the autostore for nachi mz07l 
-    eef_name: tcp
-    default_eef_step: 0.05
-    default_jump_threshold: 3.5
-    
-nachi_robot:
-  ros__parameters:
-    sim: true
-    model: "mz07L"
-    ip: "192.168.2.10"
+    home: [0.7192, -1.4436, -0.7244, 0.0]
+    rack_2: [0.0, 0.0, 0.0, 0.0]
+    rack_3: [0.0, 0.0, 0.0, 0.0]
+    rack_4: [0.0, 0.0, 0.0, 0.0]
 
 vacuum_gripper:
   ros__parameters:
-    sim: false
-    can_id: 0x55
+    # sim: false
+    leak_threshold: -45000.0 # unit: Pa
 
-    # valve
-    no_of_channel: 2
+/left_arm/robot_controller:
+  ros__parameters:
+    group_name: "left_arm"
+    eef_name: "left_tcp"
+    ref_frame: "link4"
+    default_eef_step: 0.005
+    default_jump_threshold: 5.0
+
+/right_arm/robot_controller:
+  ros__parameters:
+    group_name: "right_arm"
+    eef_name: "right_tcp"
+    ref_frame: "link4"
+    default_eef_step: 0.005
+    default_jump_threshold: 5.0
+
+/fold_elevator/robot_controller:
+  ros__parameters:
+    group_name: "fold_elevator"
+    eef_name: "link4"
+    ref_frame: "base_footprint"
+    default_eef_step: 0.005
+    default_jump_threshold: 5.0
+
+gripper:
+  ros__parameters:
+    # sim: false
+    can_id: 0x55
+    can_namespace: "upper_orin"
+    can_interface: "can2"
+
+    # clip
+    enable_clip: true
+    min_gripper_force: 20
+    max_gripper_force: 100
+    min_gripper_position: 0.0
+    max_gripper_position: 95.0
 
     # ultrasonic sensor
-    enable_ultrasonic: true
+    enable_ultrasonic: false
     field_of_view: 0.3
     min_range: 0.05
     max_range: 0.5
+
+    # vaccum pressure
+    leak_threshold: -45000.0   # unit: Pa
+
+
 

@@ -6,20 +6,20 @@ void RobotController::robot_speed_cb(
 {
   Float32 msg;
   msg.data = request->speed;
+
   speed_pub_->publish(std::move(msg));
 
   response->success = true;
-
   RCLCPP_DEBUG(get_logger(), "%s successully", __FUNCTION__);
 }
 
-void RobotController::get_curr_joint_states(
-  const std::shared_ptr<GetCurrentJointStates::Request> request, 
-  std::shared_ptr<GetCurrentJointStates::Response> response)
+void RobotController::get_joint_states_cb(
+  const std::shared_ptr<GetJointStates::Request> request, 
+  std::shared_ptr<GetJointStates::Response> response)
 {
   (void) request;
 
-  std::optional<sensor_msgs::msg::JointState> joint_states = move_group_->get_curr_joint_states();
+  std::optional<sensor_msgs::msg::JointState> joint_states = move_group_->get_joint_states();
 
   if (!joint_states.has_value())
   {
@@ -35,11 +35,33 @@ void RobotController::get_curr_joint_states(
   RCLCPP_DEBUG(get_logger(), "%s successully", __FUNCTION__);
 }
 
-void RobotController::get_curr_pose_cb(
-  const std::shared_ptr<GetCurrentPose::Request> request, 
-  std::shared_ptr<GetCurrentPose::Response> response)
+void RobotController::get_joint_limits_cb(
+  const std::shared_ptr<GetJointLimits::Request> request, 
+  std::shared_ptr<GetJointLimits::Response> response)
 {
-  std::optional<geometry_msgs::msg::Pose> pose = move_group_->get_curr_pose(request->joint_name);
+  (void) request;
+
+  std::optional<std::vector<moveit_msgs::msg::JointLimits>> joint_limits = move_group_->get_joint_limits();
+
+  if (!joint_limits.has_value())
+  {
+    response->success = false;
+    response->message = "Failed to get the joint limits";
+    RCLCPP_ERROR(get_logger(), "%s", response->message.c_str());
+    return;
+  }
+
+  response->joint_limits = std::move(joint_limits.value());
+  response->success = true;
+
+  RCLCPP_DEBUG(get_logger(), "%s successully", __FUNCTION__);
+}
+
+void RobotController::get_pose_cb(
+  const std::shared_ptr<GetPose::Request> request, 
+  std::shared_ptr<GetPose::Response> response)
+{
+  std::optional<geometry_msgs::msg::Pose> pose = move_group_->get_pose(request->joint_name);
 
   if (!pose.has_value())
   {

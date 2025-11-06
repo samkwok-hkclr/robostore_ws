@@ -19,6 +19,10 @@
   <exec_depend>vision_recognition</exec_depend>
   <exec_depend>ros2_socketcan</exec_depend>
   <exec_depend>web_video_server</exec_depend>
+  <exec_depend>rosbridge_server</exec_depend>
+  <exec_depend>octomap</exec_depend>
+  <exec_depend>moveit_ros_perception</exec_depend>
+
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<robot name="shelf" xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <xacro:macro name="shelf" params="parent prefix level height *origin">
+
+    <xacro:property name="shelf_length" value="1.2"/>
+    <xacro:property name="shelf_width" value="0.37"/>
+    <xacro:property name="shelf_height" value="0.036"/>
+
+    <joint name="${prefix}_shelf_${level}_joint" type="fixed">
+      <parent link="${parent}" />
+      <child link="${prefix}_shelf_${level}_link" />
+      <origin xyz="0 0 ${height}" rpy="0 0 0" />
+    </joint>
+
+    <link name="${prefix}_shelf_${level}_link">
+      <visual>
+        <origin xyz="${shelf_length/2} ${shelf_width/2} ${shelf_height/2}" rpy="0 0 0" />
+        <geometry>
+          <box size="${shelf_length} ${shelf_width} ${shelf_height}"/>
+        </geometry>
+        <material name="white"/>
+      </visual>
+      <collision>
+        <origin xyz="${shelf_length/2} ${shelf_width/2} ${shelf_height/2}" rpy="0 0 0" />
+        <geometry>
+          <box size="${shelf_length} ${shelf_width} ${shelf_height}"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <joint name="${prefix}_shelf_${level}_flat_joint" type="fixed">
+      <parent link="${prefix}_shelf_${level}_link" />
+      <child link="${prefix}_shelf_${level}_flat_link" />
+      <origin xyz="0 0 ${shelf_height}" rpy="0 0 0" />
+    </joint>
+
+    <link name="${prefix}_shelf_${level}_flat_link" />
+
+  </xacro:macro>
+  
+</robot>

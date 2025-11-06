@@ -1,49 +1,59 @@
 #include "robot_controller/move_group.hpp"
 #include "bspline/bspline.hpp"
 
-MoveGroup::MoveGroup(const rclcpp::NodeOptions& options)
-: Node("move_group", options)
+MoveGroup::MoveGroup(const rclcpp::NodeOptions& options, const std::string& name)
+: Node(name + "_move_group_interface", options)
 {
-  // rclcpp::NodeOptions node_options;
-  // node_options.automatically_declare_parameters_from_overrides(true);
-
-  declare_parameter<std::string>("robot_description", "");
-  declare_parameter<std::string>("robot_description_semantic", "");
-  declare_parameter<std::string>("robot_description_kinematics", "");
-
   RCLCPP_INFO(get_logger(), "Move Group Node is up.");
 }
 
 MoveGroup::~MoveGroup()
 {
-
+  move_group_.reset();
+  planning_scene_.reset();
 }
 
-bool MoveGroup::config_robot(std::string description_path, std::string semantic_path, std::string kinematics_path)
+bool MoveGroup::init_move_group(std::string ns, std::string group_name, std::string eef_name, std::string ref_frame)
 {
-  const rclcpp::Parameter description_param("robot_description", description_path);
-  const rclcpp::Parameter semantic_param("robot_description_semantic", semantic_path);
-  const rclcpp::Parameter kinematics_param("robot_description_kinematics", kinematics_path);
-
-  set_parameter(description_param);
-  set_parameter(semantic_param);
-  set_parameter(kinematics_param);
-  
-  return true;
-}
-
-bool MoveGroup::init_move_group(std::string group_name, std::string eef_name)
-{
+  RCLCPP_INFO(get_logger(), "Try to init Move Group Interface");
   if (group_name.empty() || eef_name.empty())
   {
     RCLCPP_INFO(get_logger(), "group_name or eef_name is empty");
     return false;
   }
 
-  move_group_ = std::make_unique<MoveGroupInterface>(shared_from_this(), group_name); // how to pass this class to it?
-
   RCLCPP_INFO(get_logger(), "group_name: %s", group_name.c_str());
   RCLCPP_INFO(get_logger(), "eef_name: %s", eef_name.c_str());
+
+  if (ns.empty())
+  {
+    move_group_ = std::make_unique<MoveGroupInterface>(shared_from_this(), group_name);
+    RCLCPP_INFO(get_logger(), "Move Group Interface created");
+  }
+  else
+  {
+    if (ns[0] != '/')
+    {
+      ns.insert(0, "/");
+    }
+    RCLCPP_INFO(get_logger(), "move group namespace: %s", ns.c_str());
+
+    try
+    {
+      auto option = MoveGroupInterface::Options(group_name, MoveGroupInterface::ROBOT_DESCRIPTION, ns);
+      move_group_ = std::make_unique<MoveGroupInterface>(shared_from_this(), option);
+    }
+    catch (const std::exception& e)
+    {
+      RCLCPP_ERROR(get_logger(), "std err: %s",  e.what());
+      return false;
+    }
+    catch (...)
+    {
+      RCLCPP_ERROR(get_logger(), "unknown exception in the initialization");
+      return false;
+    }
+  }
 
   if (!move_group_->setEndEffectorLink(eef_name))
   {
@@ -51,7 +61,10 @@ bool MoveGroup::init_move_group(std::string group_name, std::string eef_name)
     return false;
   }
 
-  planning_scene_ = std::make_unique<PlanningSceneInterface>();
+  move_group_->setPoseReferenceFrame(ref_frame);
+
+  planning_scene_ = std::make_unique<PlanningSceneInterface>("planning_scene_interface");
+
   return true;
 }
 
@@ -61,30 +74,70 @@ void MoveGroup::set_use_bspline(bool use, double step)
   bspline_step_ = step;
 }
 
-geometry_msgs::msg::Pose MoveGroup::get_curr_pose(std::string joint_name)
+std::optional<geometry_msgs::msg::Pose> MoveGroup::get_pose(const std::string& joint_name)
 {
   if (!move_group_)
   {
     RCLCPP_INFO(get_logger(), "move_group_ does not exist.");
-    return geometry_msgs::msg::Pose();
+    return std::nullopt;
   }
 
-  return move_group_->getCurrentPose(joint_name).pose;
+  return std::make_optional(move_group_->getCurrentPose(joint_name).pose);
 }
 
-sensor_msgs::msg::JointState MoveGroup::get_curr_joint_states()
+std::optional<sensor_msgs::msg::JointState> MoveGroup::get_joint_states()
 {
   if (!move_group_)
   {
     RCLCPP_INFO(get_logger(), "move_group_ does not exist.");
-    return sensor_msgs::msg::JointState();
+    return std::nullopt;
   }
 
   sensor_msgs::msg::JointState msg;
   msg.name = move_group_->getJointNames();
   msg.position = move_group_->getCurrentJointValues();
 
-  return msg;
+  return std::make_optional(msg);
+}
+
+
+std::optional<std::vector<moveit_msgs::msg::JointLimits>> MoveGroup::get_joint_limits()
+{
+  if (!move_group_)
+  {
+    RCLCPP_INFO(get_logger(), "move_group_ does not exist.");
+    return std::nullopt;
+  }
+
+  const moveit::core::JointModelGroup* joint_model_group = move_group_->getCurrentState()->getJointModelGroup(move_group_->getName());
+  std::vector<std::string> joint_model_list = joint_model_group->getJointModelNames();
+
+  std::string joint_names = std::accumulate(joint_model_list.begin(), joint_model_list.end(), std::string(""),
+    [](const std::string& a, const std::string& b) {
+        return a + (a.empty() ? "" : ", ") + b;
+    });
+  RCLCPP_DEBUG(get_logger(), "joint model list: [%s]", joint_names.c_str());
+
+  std::vector<moveit_msgs::msg::JointLimits> joint_limits;
+
+  for (const auto& joint : joint_model_list)
+  {
+    const moveit::core::JointModel* joint_model = joint_model_group->getJointModel(joint);
+    std::vector<moveit_msgs::msg::JointLimits> joint_limit = joint_model->getVariableBoundsMsg();
+
+    if (!joint_limit.empty())
+    {
+      joint_limits.emplace_back(std::move(joint_limit[0]));
+    }
+  }
+
+  if (joint_limits.empty())
+  {
+    RCLCPP_WARN(get_logger(), "No joint limits found for any joints in group: %s", move_group_->getName().c_str());
+    return std::nullopt;
+  }
+
+  return std::make_optional(joint_limits);
 }
 
 double MoveGroup::compute_cartesian_path(
@@ -220,7 +273,7 @@ bool MoveGroup::compute_joint_path(
     return false;
   }
 
-  RCLCPP_INFO(get_logger(), "**********totg overal time: %f", rt.getDuration());
+  RCLCPP_INFO(get_logger(), "*** Time Optimal Trajectory Generation overal time: %f", rt.getDuration());
 
   // output result trajectory
   rt.getRobotTrajectoryMsg(trajectory);
@@ -321,6 +374,8 @@ moveit::core::MoveItErrorCode MoveGroup::execute_pose(
   move_group_->setPoseTarget(pose);
 
   moveit::core::MoveItErrorCode code = move_group_->move();
+  // moveit::core::MoveItErrorCode code = move_group_->asyncMove();
+
   if (code != moveit::core::MoveItErrorCode::SUCCESS)
   {
     RCLCPP_WARN(get_logger(), "Failed with MoveItErrorCode: %d", code.val);
@@ -333,9 +388,12 @@ moveit::core::MoveItErrorCode MoveGroup::execute_joints(
   const std::vector<double>& joints)
 {
   move_group_->setJointValueTarget(joints);
-  move_group_->setMaxVelocityScalingFactor(0.3);
+  set_max_velocity_scaling_factor(1.0);
+  set_max_acceleration_scaling_factor(0.8);
 
   moveit::core::MoveItErrorCode code = move_group_->move();
+  // moveit::core::MoveItErrorCode code = move_group_->asyncMove();
+
   if (code != moveit::core::MoveItErrorCode::SUCCESS)
   {
     RCLCPP_WARN(get_logger(), "Failed with MoveItErrorCode: %d", code.val);
@@ -355,8 +413,9 @@ moveit::core::MoveItErrorCode MoveGroup::execute(
     return moveit::core::MoveItErrorCode::INVALID_MOTION_PLAN;
   }
 
-  moveit::core::MoveItErrorCode code;
-  code = move_group_->execute(trajectory);
+  moveit::core::MoveItErrorCode code = move_group_->execute(trajectory);
+  // moveit::core::MoveItErrorCode code = move_group_->asyncExecute(trajectory);
+
   RCLCPP_INFO(get_logger(), "executed a trajectory");
 
   return code;
@@ -400,7 +459,7 @@ void MoveGroup::set_max_acceleration_scaling_factor(double max_acceleration_scal
     max_acceleration_scaling_factor = 1.0;
   }
 
-  move_group_->setMaxVelocityScalingFactor(max_acceleration_scaling_factor);
+  move_group_->setMaxAccelerationScalingFactor(max_acceleration_scaling_factor);
 }
 
 bool MoveGroup::add_collision_objects(
@@ -436,6 +495,7 @@ bool MoveGroup::remove_collision_objects(const std::vector<std::string>& object_
   // if async, plan **might** (by chance / when sys under heavy load) fail as the gripper collide with the box to be picked,
   // which should have been removed, but still stay at the scene
   std::vector<moveit_msgs::msg::CollisionObject> remove_objects;
+  
   for (const auto& object_id : object_ids)
   {
     moveit_msgs::msg::CollisionObject remove_object;
@@ -445,7 +505,6 @@ bool MoveGroup::remove_collision_objects(const std::vector<std::string>& object_
   }
 
   planning_scene_->applyCollisionObjects(remove_objects); // this is sync
-  //planning_scene_->removeCollisionObjects(object_ids); // this is async 
   
   return true;
 }
@@ -523,7 +582,7 @@ bool MoveGroup::compute_timestamps_totg(
     RCLCPP_ERROR(get_logger(), "Computing time stamps for JointPath failed");
     return false;
   }
-  RCLCPP_INFO(get_logger(), "********** totg overal time: %f", rt.getDuration());
+  RCLCPP_INFO(get_logger(), "********** Time Optimal Trajectory Generation overal time: %f", rt.getDuration());
 
   // output result trajectory
   rt.getRobotTrajectoryMsg(trajectory);

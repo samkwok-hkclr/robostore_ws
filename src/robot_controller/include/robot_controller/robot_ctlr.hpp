@@ -34,8 +34,9 @@
 #include "robot_controller_msgs/srv/execute_pose.hpp"
 #include "robot_controller_msgs/srv/execute_waypoints.hpp"
 #include "robot_controller_msgs/srv/get_collision_objects_from_scene.hpp"
-#include "robot_controller_msgs/srv/get_current_joint_states.hpp"
-#include "robot_controller_msgs/srv/get_current_pose.hpp"
+#include "robot_controller_msgs/srv/get_joint_states.hpp"
+#include "robot_controller_msgs/srv/get_joint_limits.hpp"
+#include "robot_controller_msgs/srv/get_pose.hpp"
 #include "robot_controller_msgs/srv/move_collision_objects.hpp"
 #include "robot_controller_msgs/srv/push_pose_array.hpp"
 #include "robot_controller_msgs/srv/remove_collision_objects.hpp"
@@ -67,8 +68,9 @@ class RobotController : public rclcpp::Node
   using ExecutePose = robot_controller_msgs::srv::ExecutePose;
   using ExecuteWaypoints = robot_controller_msgs::srv::ExecuteWaypoints;
   using GetCollisionObjectsFromScene = robot_controller_msgs::srv::GetCollisionObjectsFromScene;
-  using GetCurrentJointStates = robot_controller_msgs::srv::GetCurrentJointStates;
-  using GetCurrentPose = robot_controller_msgs::srv::GetCurrentPose;
+  using GetJointStates = robot_controller_msgs::srv::GetJointStates;
+  using GetJointLimits = robot_controller_msgs::srv::GetJointLimits;
+  using GetPose = robot_controller_msgs::srv::GetPose;
   using MoveCollisionObjects = robot_controller_msgs::srv::MoveCollisionObjects;
   using PushPoseArray = robot_controller_msgs::srv::PushPoseArray;
   using RemoveCollisionObjects = robot_controller_msgs::srv::RemoveCollisionObjects;
@@ -92,13 +94,13 @@ public:
   
   bool exec_waypoints(
     const std::vector<Pose>& waypoints,
-    const double speed,
+    const double speed = 100.0,
     std::string *ret_msg = nullptr);
   bool exec_waypoints(
     const std::vector<Pose>& waypoints,
     const double eef_step,
     const double jump_threshold,
-    const double speed,
+    const double speed = 100.0,
     std::string *ret_msg = nullptr);
   bool exec_pushed_waypoints(std::string *ret_msg = nullptr);
 
@@ -149,12 +151,15 @@ public:
     const std::shared_ptr<RobotSpeed::Request> request, 
     std::shared_ptr<RobotSpeed::Response> response);
 
-  void get_curr_pose_cb(
-    const std::shared_ptr<GetCurrentPose::Request> request, 
-    std::shared_ptr<GetCurrentPose::Response> response);
-  void get_curr_joint_states(
-    const std::shared_ptr<GetCurrentJointStates::Request> request, 
-    std::shared_ptr<GetCurrentJointStates::Response> response);
+  void get_pose_cb(
+    const std::shared_ptr<GetPose::Request> request, 
+    std::shared_ptr<GetPose::Response> response);
+  void get_joint_states_cb(
+    const std::shared_ptr<GetJointStates::Request> request, 
+    std::shared_ptr<GetJointStates::Response> response);
+  void get_joint_limits_cb(
+    const std::shared_ptr<GetJointLimits::Request> request, 
+    std::shared_ptr<GetJointLimits::Response> response);
 
   void push_pose_array_cb(
     const std::shared_ptr<PushPoseArray::Request> request, 
@@ -174,9 +179,11 @@ private:
   std::atomic<double> eef_step_;
   std::atomic<double> jump_threshold_;
 
+  std::string move_group_ns_; 
   std::string group_name_; 
   std::string eef_name_;
-
+  std::string ref_frame_;
+  
   std::vector<Pose> pushed_waypoints_{};
   std::shared_ptr<MoveGroup> move_group_;
   // RobotLeftSensingRegionCallback left_region_cb_;
@@ -207,7 +214,7 @@ private:
   rclcpp::CallbackGroup::SharedPtr timer_cbg_;
 
   // ============== Timers ==============
-  rclcpp::TimerBase::SharedPtr pose_pub_timer;
+  rclcpp::TimerBase::SharedPtr pose_pub_timer_;
 
   // ============== Publishers ==============
   // FIXME: The speed_pub_ is a quick-fix for setting speed
@@ -236,8 +243,9 @@ private:
 
   // ============== General Services ==============
   rclcpp::Service<RobotSpeed>::SharedPtr robot_speed_srv_;
-  rclcpp::Service<GetCurrentPose>::SharedPtr get_curr_pose_srv_;
-  rclcpp::Service<GetCurrentJointStates>::SharedPtr get_curr_joint_states_srv_;
+  rclcpp::Service<GetPose>::SharedPtr get_pose_srv_;
+  rclcpp::Service<GetJointStates>::SharedPtr get_joint_states_srv_;
+  rclcpp::Service<GetJointLimits>::SharedPtr get_joint_limits_srv_;
   rclcpp::Service<PushPoseArray>::SharedPtr push_pose_arr_srv_;
   rclcpp::Service<Trigger>::SharedPtr clear_pose_arr_srv_;
 

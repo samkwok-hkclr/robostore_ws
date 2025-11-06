@@ -19,11 +19,10 @@ using PlanningSceneInterface = moveit::planning_interface::PlanningSceneInterfac
 class MoveGroup : public rclcpp::Node
 {
 public:
-  MoveGroup(const rclcpp::NodeOptions& options);
+  MoveGroup(const rclcpp::NodeOptions& options, const std::string& name);
   ~MoveGroup();
   
-  bool config_robot(std::string robot_description_path, std::string robot_semantic_path, std::string kinematics_path);
-  bool init_move_group(std::string group_name, std::string end_effector_name);
+  bool init_move_group(std::string ns, std::string group_name, std::string eff_name, std::string ref_frame);
   void set_use_bspline(bool use, double step);
 
   bool add_collision_objects(
@@ -31,13 +30,13 @@ public:
     const std::vector<moveit_msgs::msg::ObjectColor>& object_colors = std::vector<moveit_msgs::msg::ObjectColor>());
   bool remove_collision_objects(const std::vector<std::string>& object_ids);
   bool move_collision_object(std::string key, const geometry_msgs::msg::Pose& pose, bool is_mesh);
-
   bool apply_attached_collision_objects(const std::vector<moveit_msgs::msg::AttachedCollisionObject>& attached_collision_objects);
   std::map<std::string, moveit_msgs::msg::CollisionObject> get_collision_objects_from_scene(
     const std::vector<std::string>& object_ids = std::vector<std::string>());
 
-  geometry_msgs::msg::Pose get_curr_pose(std::string joint_name = "");
-  sensor_msgs::msg::JointState get_curr_joint_states();
+  std::optional<geometry_msgs::msg::Pose> get_pose(const std::string& joint_name = "");
+  std::optional<sensor_msgs::msg::JointState> get_joint_states();
+  std::optional<std::vector<moveit_msgs::msg::JointLimits>> get_joint_limits();
   
   moveit::core::MoveItErrorCode execute(
     const moveit_msgs::msg::RobotTrajectory& trajectory);
@@ -68,13 +67,6 @@ public:
   std::string vec_to_str(const std::vector<double>& vec);
 
 private:
-  std::string group_name_;
-  // void asyncSpinner();
-  // void configRobotFromFile(std::string name, std::string path);
-  // void configKinematics(std::string path);
-  // std::string loadFile(std::string path);
-
-  // std::shared_ptr<rclcpp::Node> node_;
   std::unique_ptr<MoveGroupInterface> move_group_;
   std::unique_ptr<PlanningSceneInterface> planning_scene_;
 

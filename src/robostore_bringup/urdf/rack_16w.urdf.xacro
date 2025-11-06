@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<robot name="rack" xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <xacro:include filename="$(find robostore_bringup)/urdf/shelf_16w.urdf.xacro" />
+
+  <xacro:macro name="rack" params="name id parent *origin">
+
+    <xacro:property name="backplane_width" value="1.2"/>
+    <xacro:property name="backplane_depth" value="0.05"/>
+    <xacro:property name="backplane_height" value="1.95"/>
+
+    <xacro:property name="shelf_width" value="0.37"/>
+
+    <joint name="${name}_${id}_base_joint" type="fixed">
+      <joint_properties damping="1" friction="1" />
+      <xacro:insert_block name="origin" />
+      <parent link="${parent}" />
+      <child link="${name}_${id}_base_link" />
+    </joint>
+
+    <link name="${name}_${id}_base_link" />
+
+    <joint name="backplane_joint" type="fixed">
+      <parent link="${name}_${id}_base_link" />
+      <child link="backplane_link" />
+      <origin xyz="0 ${shelf_width} 0" rpy="0 0 0"/>
+    </joint>
+
+    <link name="backplane_link">
+      <visual>
+        <origin xyz="${backplane_width/2} ${backplane_depth/2} ${backplane_height/2}" rpy="0 0 0" />
+        <geometry>
+          <box size="${backplane_width} ${backplane_depth} ${backplane_height}"/>
+        </geometry>
+        <material name="">
+          <color rgba="0.78 0.82 0.78 1" />
+        </material>
+      </visual>
+      <collision>
+        <origin xyz="${backplane_width/2} ${backplane_depth/2} ${backplane_height/2}" rpy="0 0 0" />
+        <geometry>
+          <box size="${backplane_width} ${backplane_depth} ${backplane_height}"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <xacro:shelf parent="${name}_${id}_base_link" prefix="${name}_${id}" level="1" height="0.14 ">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+    </xacro:shelf>
+
+    <xacro:shelf parent="${name}_${id}_base_link" prefix="${name}_${id}" level="2" height="0.525">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+    </xacro:shelf>
+
+    <xacro:shelf parent="${name}_${id}_base_link" prefix="${name}_${id}" level="3" height="1.025">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+    </xacro:shelf>
+
+    <xacro:shelf parent="${name}_${id}_base_link" prefix="${name}_${id}" level="4" height="1.45">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+    </xacro:shelf>
+
+    <xacro:shelf parent="${name}_${id}_base_link" prefix="${name}_${id}" level="5" height="1.845">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+    </xacro:shelf>
+
+  </xacro:macro>
+  
+</robot>

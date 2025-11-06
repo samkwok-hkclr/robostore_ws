@@ -5,41 +5,41 @@ RobotController::RobotController(
   std::shared_ptr<rclcpp::executors::MultiThreadedExecutor> executor)
 : Node("robot_controller", options)
 {
-  std::string description_file;
-  std::string semantic_file;
-  std::string kinematics_file;
-
+  declare_parameter<std::string>("move_group_namespace", "");
   declare_parameter<std::string>("group_name", "");
   declare_parameter<std::string>("eef_name", "");
-  declare_parameter<std::string>("description_file", "");
-  declare_parameter<std::string>("semantic_file", "");
-  declare_parameter<std::string>("kinematics_file", "");
-  declare_parameter<double>("default_eef_step", 0.0);
-  declare_parameter<double>("default_jump_threshold", 0.0);
+  declare_parameter<std::string>("ref_frame", "");
 
+  declare_parameter<double>("default_eef_step", 0.01);
+  declare_parameter<double>("default_jump_threshold", 5.0);
+
+  get_parameter("move_group_namespace", move_group_ns_);
   get_parameter("group_name", group_name_);
   get_parameter("eef_name", eef_name_);
-  get_parameter("description_file", description_file); // FIXME: It is empty
-  get_parameter("semantic_file", semantic_file); // FIXME: It is empty
-  get_parameter("kinematics_file", kinematics_file); // FIXME: It is empty
+  get_parameter("ref_frame", ref_frame_);
+
   eef_step_ = get_parameter("default_eef_step").as_double();
   jump_threshold_ = get_parameter("default_jump_threshold").as_double();
 
   rclcpp::NodeOptions move_group_options = options;
+  // move_group_options.use_global_arguments(false);
+
+  if (move_group_ns_.empty())
+  {
+    RCLCPP_INFO(get_logger(), "move_group_namespace is empty.");
+  }
+  else
+  {
+    // move_group_options.append_parameter_override("robot_description",  "/" + move_group_ns_ + "/robot_description");
+    // move_group_options.append_parameter_override("robot_description_semantic", "/" + move_group_ns_ + "/robot_description_semantic");
+    // move_group_options.append_parameter_override("robot_description_kinematics", "/" + move_group_ns_ + "/robot_description_kinematics");
+  }
   move_group_options.automatically_declare_parameters_from_overrides(true);
   
-  move_group_ = std::make_shared<MoveGroup>(move_group_options);
+  move_group_ = std::make_shared<MoveGroup>(move_group_options, group_name_);
   executor->add_node(move_group_->get_node_base_interface());
 
-  if (!move_group_->config_robot(description_file, semantic_file, kinematics_file))
-  {    
-    RCLCPP_INFO(get_logger(), "move group config Failed.");
-    rclcpp::shutdown();
-    return;
-  }
-  RCLCPP_INFO(get_logger(), "Robot Controller Node - configured robot");
-
-  if (!move_group_->init_move_group(group_name_, eef_name_))
+  if (!move_group_->init_move_group(move_group_ns_, group_name_, eef_name_, ref_frame_))
   {
     RCLCPP_INFO(get_logger(), "move group init Failed.");
     rclcpp::shutdown();
@@ -58,16 +58,18 @@ RobotController::RobotController(
   RCLCPP_INFO(get_logger(), "Robot Controller Node - initiated callback groups");
   
   // ============== Timers ==============
-  pose_pub_timer = create_wall_timer(
-    std::chrono::milliseconds(10), 
+  pose_pub_timer_ = create_wall_timer(
+    std::chrono::milliseconds(100), 
     std::bind(&RobotController::pose_pub_cb, this),
     timer_cbg_);
+
+  pose_pub_timer_->cancel(); // not used
 
   RCLCPP_INFO(get_logger(), "Robot Controller Node - initiated timers");
   
   // ============== Publishers ==============
   speed_pub_ = create_publisher<Float32>("robot_speed", 10);
-  curr_pose_pub_ = create_publisher<Pose>("current_pose", 10);
+  curr_pose_pub_ = create_publisher<Pose>("pose", 10);
 
   RCLCPP_INFO(get_logger(), "Robot Controller Node - initiated publishers");
 
@@ -141,15 +143,21 @@ RobotController::RobotController(
     rmw_qos_profile_services_default,
     srv_ser_cbg_);
 
-  get_curr_joint_states_srv_ = create_service<GetCurrentJointStates>(
+  get_joint_states_srv_ = create_service<GetJointStates>(
     "get_current_joint_states", 
-    std::bind(&RobotController::get_curr_joint_states, this, _1, _2),
+    std::bind(&RobotController::get_joint_states_cb, this, _1, _2),
     rmw_qos_profile_services_default,
     srv_ser_cbg_);
 
-  get_curr_pose_srv_ = create_service<GetCurrentPose>(
-    "get_current_pose", 
-    std::bind(&RobotController::get_curr_pose_cb, this, _1, _2),
+  get_joint_limits_srv_ = create_service<GetJointLimits>(
+    "get_joint_limits", 
+    std::bind(&RobotController::get_joint_limits_cb, this, _1, _2),
+    rmw_qos_profile_services_default,
+    srv_ser_cbg_);
+
+  get_pose_srv_ = create_service<GetPose>(
+    "get_pose", 
+    std::bind(&RobotController::get_pose_cb, this, _1, _2),
     rmw_qos_profile_services_default,
     srv_ser_cbg_);
 
@@ -182,15 +190,16 @@ RobotController::RobotController(
 
 void RobotController::pose_pub_cb(void)
 {
-  std::optional<Pose> pose = move_group_->get_curr_pose(eef_name_);
+  // move_group_->get_joint_limits();
+  // std::optional<Pose> pose = move_group_->get_pose(eef_name_);
 
-  if (!pose.has_value())
-  {
-    RCLCPP_ERROR(get_logger(), "Failed to get current pose for joint [%s]", eef_name_.c_str());
-    return;
-  }
+  // if (!pose.has_value())
+  // {
+  //   RCLCPP_ERROR(get_logger(), "Failed to get current pose for joint [%s]", eef_name_.c_str());
+  //   return;
+  // }
 
-  curr_pose_pub_->publish(std::move(*pose));
+  // curr_pose_pub_->publish(std::move(pose.value()));
 }
 
 bool RobotController::are_poses_equal(
@@ -311,7 +320,7 @@ bool RobotController::exec_waypoints(
   }
 
   moveit_msgs::msg::RobotTrajectory trajectory;
-  moveit_msgs::msg::MoveItErrorCodes errCodes;
+  moveit_msgs::msg::MoveItErrorCodes err_codes;
 
   double fraction = move_group_->compute_cartesian_path(
     std::move(waypoints), 
@@ -319,7 +328,7 @@ bool RobotController::exec_waypoints(
     jump_threshold, 
     trajectory, 
     true, 
-    &errCodes);
+    &err_codes);
     
   RCLCPP_INFO(get_logger(), "Compute Cartesian Path fraction: %.6f", fraction);
 
@@ -335,14 +344,14 @@ bool RobotController::exec_waypoints(
 
   Float32 msg;
   msg.data = speed;
-  speed_pub_->publish(std::move(msg));
+  speed_pub_->publish(msg);
 
   // trajectory.joint_trajectory.header.frame_id = std::to_string(speed);
 
   RCLCPP_WARN(get_logger(), "Scaling trajectory with robot speed: %.4f", speed / 100.0);
   move_group_->compute_timestamps_totg(trajectory, speed / 100.0, speed / 100.0);
 
-  RCLCPP_ERROR(get_logger(), "******** duration: %d.%d", 
+  RCLCPP_WARN(get_logger(), "******** duration: %d.%d", 
     trajectory.joint_trajectory.points.back().time_from_start.sec, 
     trajectory.joint_trajectory.points.back().time_from_start.nanosec);
 
@@ -353,7 +362,7 @@ bool RobotController::exec_waypoints(
     const std::string err_msg = "Execute failed with error: " + std::to_string(code.val);
     *ret_msg = err_msg;
 
-    RCLCPP_WARN(get_logger(), "%s", err_msg.c_str());
+    RCLCPP_ERROR(get_logger(), "%s", err_msg.c_str());
     return false;
   } 
 
@@ -364,14 +373,14 @@ bool RobotController::exec_pushed_waypoints(std::string *ret_msg)
 {
   if (pushed_waypoints_.empty())
   {
-    *ret_msg = "No waypoints available for execution";
-    return false;
+    RCLCPP_WARN(get_logger(), "No waypoints available for execution");
+    return true;
   }
 
   auto waypoints = std::exchange(pushed_waypoints_, {});
 
-  // Execute with default velocity scaling (50%)
-  const bool success = exec_waypoints(waypoints, 50.0);
+  // Execute with default velocity scaling (100%)
+  const bool success = exec_waypoints(waypoints, 100.0);
 
   if (!success && ret_msg) 
   {

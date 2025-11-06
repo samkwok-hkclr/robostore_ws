@@ -43,6 +43,8 @@ void RobotController::exec_pose_cb(
     return;
   }
 
+  move_group_->set_max_velocity_scaling_factor(1.0);
+
   if (move_group_->execute_pose(request->pose) != moveit::core::MoveItErrorCode::SUCCESS)
   {
     std::string err_msg = "execute_pose failed !!!!!!";
@@ -109,7 +111,7 @@ void RobotController::exec_waypoints_cb(
     request->waypoints, 
     request->eef_step == 0.0 ? eef_step_.load() : request->eef_step,
     request->jump_threshold == 0.0 ? jump_threshold_.load() : request->jump_threshold,
-    request->speed,
+    request->speed == 0.0 ? request->speed : 100.0,
     &response->message
   );
 }

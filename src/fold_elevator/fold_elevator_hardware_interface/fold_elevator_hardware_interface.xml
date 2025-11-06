@@ -1,0 +1,10 @@
+<library path="fold_elevator_hardware_interface">
+  <class 
+    name="fold_elevator_hardware_interface/FoldElevatorHardwareInterface" 
+    type="fold_elevator_hardware_interface::FoldElevatorHardwareInterface" 
+    base_class_type="hardware_interface::SystemInterface">
+    <description>
+      Hardware interface for CAN-based motors used in fold elevator.
+    </description>
+  </class>
+</library>

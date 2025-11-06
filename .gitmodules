@@ -1,12 +1,42 @@
+[submodule "realsense-ros"]
+	path = src/external_libraries/realsense-ros
+	url = https://github.com/IntelRealSense/realsense-ros
+	branch = ros2-master
+
 [submodule "camera_manager"]
 	path = src/camera_manager
 	url = https://github.com/samkwok-hkclr/camera_manager
 	branch = master
 
-[submodule "realsense-ros"]
-	path = src/external_libraries/realsense-ros
-	url = https://github.com/IntelRealSense/realsense-ros
-	branch = tags/4.54.1
+[submodule "can_brigde"]
+	path = src/can_brigde
+	url = https://github.com/samkwok-hkclr/can_brigde
+	branch = master
+
+[submodule "dual_arm"]
+	path = src/dual_arm
+	url = https://github.com/HKCLR2021/dual_arm
+	branch = master
+
+[submodule "dual_arm_robot"]
+	path = src/dual_arm
+	url = https://github.com/HKCLR2021/dual_arm_robot
+	branch = master
+
+[submodule "fold_elevator"]
+	path = src/fold_elevator
+	url = https://github.com/HKCLR2021/fold_elevator
+	branch = master
+
+[submodule "gripper"]
+	path = src/gripper
+	url = https://github.com/samkwok-hkclr/gripper
+	branch = master
+
+[submodule "robostore_msgs"]
+	path = src/robostore_msgs
+	url = https://github.com/HKCLR2021/robostore_msgs
+	branch = master
 
 [submodule "nachi_mz07l"]
 	path = src/nachi_mz07l
@@ -38,17 +68,12 @@
 	url = https://github.com/samkwok-hkclr/robotic_platform_msgs
 	branch = master
 
-[submodule "vacuum_gripper"]
-	path = src/vacuum_gripper
-	url = https://github.com/samkwok-hkclr/vacuum_gripper
+[submodule "ros_gateway"]
+	path = src/ros_gateway
+	url = https://github.com/HKCLR2021/ros_gateway
 	branch = master
 
 [submodule "vision_recognition"]
 	path = src/vision_recognition
 	url = https://github.com/samkwok-hkclr/vision_recognition
-	branch = master
-
-[submodule "ros_gateway"]
-	path = src/ros_gateway
-	url = https://github.com/HKCLR2021/ros_gateway
 	branch = master

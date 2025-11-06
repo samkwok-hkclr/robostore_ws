@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="utf-8"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:macro name="fold_elevator" params="name parent *origin">
+
+    <link name="${name}_base_link">
+      <inertial>
+        <origin xyz="0.049999 0.056993 0.075571" rpy="0 0 0" />
+        <mass value="0.6213" />
+        <inertia
+          ixx="0.00097836"
+          ixy="4.1808E-09"
+          ixz="1.4286E-08"
+          iyy="0.0010488"
+          iyz="-9.0552E-05"
+          izz="0.00084789" />
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://fold_elevator_description/meshes/visual/base_link.STL" scale="0.001 0.001 0.001" />
+        </geometry>
+        <material name="">
+          <color rgba="0.72941 0.74902 0.74902 1.0" />
+        </material>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://fold_elevator_description/meshes/collision/base_link.STL" scale="0.001 0.001 0.001" />
+        </geometry>
+      </collision>
+    </link>
+
+    <joint name="${name}_base_joint" type="fixed">
+      <parent link="${parent}"/>
+      <child link="${name}_base_link"/>
+      <xacro:insert_block name="origin" />
+      <axis xyz="0 0 1"/>
+    </joint>
+
+    <link name="link1">
+      <inertial>
+        <origin xyz="6.9932E-07 0.24068 -0.05991" rpy="0 0 0" />
+        <mass value="0.76492" />
+        <inertia
+          ixx="0.0065309"
+          ixy="3.0624E-09"
+          ixz="-2.2651E-08"
+          iyy="0.00090992"
+          iyz="6.7991E-05"
+          izz="0.0064905" />
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://fold_elevator_description/meshes/visual/link1.STL" scale="0.001 0.001 0.001" />
+        </geometry>
+        <material name="">
+          <color rgba="0.72941 0.74902 0.74902 1" />
+        </material>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://fold_elevator_description/meshes/collision/link1.STL" scale="0.001 0.001 0.001" />
+        </geometry>
+      </collision>
+    </link>
+
+    <joint name="joint1" type="revolute">
+      <origin xyz="0.05 -0.0104 0.1045" rpy="1.57079632679 0 0" />
+      <parent link="${name}_base_link" />
+      <child link="link1" />
+      <axis xyz="0 0 -1" />
+      <limit
+        lower="0"
+        upper="1.1344640138"
+        effort="1"
+        velocity="0.1745329252" />
+    </joint>
+
+    <link name="link2">
+      <inertial>
+        <origin xyz="-0.00019459 0.23103 -0.088288" rpy="0 0 0" />
+        <mass value="0.77213" />
+        <inertia
+          ixx="0.0065937"
+          ixy="-2.2207E-08"
+          ixz="1.5389E-07"
+          iyy="0.00054292"
+          iyz="-2.341E-05"
+          izz="0.006827" />
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://fold_elevator_description/meshes/visual/link2.STL" scale="0.001 0.001 0.001" />
+        </geometry>
+        <material name="">
+          <color rgba="0.72941 0.74902 0.74902 1" />
+        </material>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://fold_elevator_description/meshes/collision/link2.STL" scale="0.001 0.001 0.001" />
+        </geometry>
+      </collision>
+    </link>
+
+    <joint name="joint2" type="revolute">
+      <origin xyz="0 0.325 0.0242" rpy="0 0 0" />
+      <parent link="link1" />
+      <child link="link2" />
+      <axis xyz="0 0 -1" />
+      <limit
+        lower="-2.7925268032"
+        upper="2.7925268032"
+        effort="1"
+        velocity="0.2617993878" />
+    </joint>
+
+    <link name="link3">
+      <inertial>
+        <origin xyz="-0.012564 0.064349 -0.0705" rpy="0 0 0" />
+        <mass value="0.2939" />
+        <inertia
+          ixx="0.0012875"
+          ixy="-1.4361E-05"
+          ixz="-5.9979E-07"
+          iyy="0.00054996"
+          iyz="-9.7816E-05"
+          izz="0.0011859" />
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://fold_elevator_description/meshes/visual/link3.STL" scale="0.001 0.001 0.001" />
+        </geometry>
+        <material name="">
+          <color rgba="0.69804 0.69804 0.69804 1" />
+        </material>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://fold_elevator_description/meshes/collision/link3.STL" scale="0.001 0.001 0.001" />
+        </geometry>
+      </collision>
+    </link>
+
+    <joint name="joint3" type="revolute">
+      <origin xyz="0 0.325 0" rpy="0 0 0" />
+      <parent link="link2" />
+      <child link="link3" />
+      <axis xyz="0 0 1" />
+      <limit
+        lower="-2.35619449"
+        upper="2.35619449"
+        effort="1"
+        velocity="0.3490658504" />
+    </joint>
+
+    <link name="link4">
+      <inertial>
+        <origin xyz="1.3336E-05 -6.5521E-05 -0.0057552" rpy="0 0 0" />
+        <mass value="0.076276" />
+        <inertia
+          ixx="7.0947E-05"
+          ixy="2.2623E-08"
+          ixz="6.6182E-09"
+          iyy="7.0793E-05"
+          iyz="-4.6063E-08"
+          izz="0.00013988" />
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://fold_elevator_description/meshes/visual/link4.STL" scale="0.001 0.001 0.001" />
+        </geometry>
+        <material name="">
+          <color rgba="0.88627 0.88627 0.88627 1" />
+        </material>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://fold_elevator_description/meshes/collision/link4.STL" scale="0.001 0.001 0.001" />
+        </geometry>
+      </collision>
+    </link>
+
+    <joint name="joint4" type="revolute">
+      <origin xyz="0 0.1687 -0.07995" rpy="-1.57079632679 0 0" />
+      <parent link="link3" />
+      <child link="link4" />
+      <axis xyz="0 0 1" />
+      <limit
+        lower="-3.4906585"
+        upper="3.4906585"
+        effort="1"
+        velocity="1.5707963268" />
+    </joint>
+    
+  </xacro:macro>
+</robot>

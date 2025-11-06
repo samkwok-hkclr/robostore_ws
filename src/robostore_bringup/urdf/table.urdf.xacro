@@ -23,7 +23,9 @@
         <geometry>
           <box size="${table_width} ${table_depth} ${table_height}"/>
         </geometry>
-        <material name="white"/>
+        <material name="">
+          <color rgba="0.6 0.1960 0.8 1" />
+        </material>
       </visual>
 
       <collision>

@@ -26,7 +26,7 @@ def to_urdf(xacro_path, parameters=None):
     return urdf_path
 
 def generate_launch_description():
-    xacro_path = os.path.join(get_package_share_directory('realsense2_description'), 'urdf', 'test_l515_camera.urdf.xacro')
+    xacro_path = os.path.join(get_package_share_directory('realsense2_description'), 'urdf', 'test_d435_camera.urdf.xacro')
     urdf = to_urdf(xacro_path, {'use_nominal_extrinsics' : 'true', 'add_plug' : 'true'})
 
     model_node = Node(

@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="fold_elevator">
+
+    <xacro:include filename="$(find fold_elevator_description)/urdf/fold_elevator.urdf.xacro" />
+    <xacro:include filename="$(find fold_elevator_configure)/config/fold_elevator.ros2_control.xacro" />
+
+    <link name="world"/>
+
+    <xacro:fold_elevator name="fold_elevator" parent="world">
+        <origin xyz="0.5 0.5 0.5" rpy="0 0 0"/>
+    </xacro:fold_elevator>
+
+    <xacro:fold_elevator_ros2_control name="" sim="true" can_interface="can1"/>
+
+</robot>
