@@ -117,5 +117,14 @@ def generate_launch_description():
             ]
         )
         ld.add_action(node)
+        
+    ld.add_action(
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(
+                os.path.join(
+                    get_package_share_directory("robostore_bringup"), "launch", "camera.launch.py")
+            )
+        )
+    )
 
     return ld

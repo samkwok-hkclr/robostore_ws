@@ -13,10 +13,9 @@ colcon build \
   --packages-select $REALSENSE_CAMERA \
   --cmake-args \
   -DCMAKE_BUILD_TYPE=Release \
-  -DUSE_LIFECYCLE_NODE=ON \
-  # -DBUILD_ACCELERATE_GPU_WITH_GLSL=ON
+  -DUSE_LIFECYCLE_NODE=ON 
 
 colcon build \
-  --packages-ignore $REALSENSE_DESCRIPTION_MSGS_PKGS $REALSENSE_CAMERA vision_recognition \
+  --packages-ignore $REALSENSE_DESCRIPTION_MSGS_PKGS $REALSENSE_CAMERA \
   --cmake-args \
   -DCMAKE_BUILD_TYPE=Release 

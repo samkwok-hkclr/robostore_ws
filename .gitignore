@@ -3,6 +3,7 @@ install/
 log/
 backup/
 vision_data/
+test_vis_records/
 code_backup/
 cmd.txt
 test.log

@@ -16,23 +16,26 @@ from launch_ros.events.lifecycle import ChangeState
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 from lifecycle_msgs.msg import Transition
 
-
 left_camera_params = {
     "camera_name": "left_camera",
     "serial_no": "405622074042",
     "usb_port_id": "",
-    "device_type": "",
-    "initial_reset": False,
+    "device_type": "d435(?!i)",
+    "initial_reset": True,
 
     "enable_color": True,
-    "rgb_camera.color_profile": "1280,720,15",
+    "rgb_camera.color_profile": "1280,720,6",
     "rgb_camera.color_format": "RGB8",
     "rgb_camera.enable_auto_exposure": True,
+    "rgb_camera.power_line_frequency": 1,
     "enable_auto_white_balance": True,   # flat param (not under rgb_camera)
+    
+    # "hdr_merge": True,
 
     "enable_depth": True,
-    "depth_module.depth_profile": "1280,720,15",
+    "depth_module.depth_profile": "1280,720,6",
     "depth_module.depth_format": "Z16",
+    # "depth_module.hdr_enabled": True,
     "depth_module.min_distance": 190,
     "depth_module.digital_gain": 2,
     "depth_module.receiver_gain": 18,
@@ -43,10 +46,10 @@ left_camera_params = {
     "depth_module.visual_preset": 5,
     "depth_module.invalidation_bypass": False,
 
-    "enable_infra": True,
+    "enable_infra": False,
     "enable_infra1": False,
     "enable_infra2": False,
-    "enable_confidence": True,
+    "enable_confidence": False,
 
     "enable_gyro": False,
     "enable_accel": False,
@@ -58,10 +61,10 @@ left_camera_params = {
 
     "enable_rgbd": True,
 
-    "pointcloud.enable": True,
-    "pointcloud.stream_filter": 2,      # 2 = infra (stereo)
-    "pointcloud.ordered_pc": True,
-    "pointcloud.allow_no_texture_points": False,
+    "pointcloud__neon_.enable": True,
+    "pointcloud__neon_.stream_filter": 2,
+    "pointcloud__neon_.ordered_pc": False,
+    "pointcloud__neon_.allow_no_texture_points": False,
 
     "align_depth.enable": True,
     "colorizer.enable": False,
@@ -76,10 +79,10 @@ left_camera_params = {
     "tf_publish_rate": 0.0,
     "publish_odom_tf": False,
 
-    "clip_distance": -2.0,
+    "clip_distance": 1.0,
     "angular_velocity_cov": 0.01,
     "linear_accel_cov": 0.01,
-    "diagnostics_period": 5.0,
+    "diagnostics_period": 1.0,
     "wait_for_device_timeout": -1.0,
     "reconnect_timeout": 3.0,
 }
@@ -88,18 +91,22 @@ right_camera_params = {
     "camera_name": "right_camera",
     "serial_no": "138422074515",
     "usb_port_id": "",
-    "device_type": "",
-    "initial_reset": False,
+    "device_type": "d435(?!i)",
+    "initial_reset": True,
 
     "enable_color": True,
-    "rgb_camera.color_profile": "1280,720,15",
+    "rgb_camera.color_profile": "1280,720,6",
     "rgb_camera.color_format": "RGB8",
     "rgb_camera.enable_auto_exposure": True,
+    "rgb_camera.power_line_frequency": 1,
     "enable_auto_white_balance": True,
+    
+    # "hdr_merge": True,
 
     "enable_depth": True,
-    "depth_module.depth_profile": "1280,720,15",
+    "depth_module.depth_profile": "1280,720,6",
     "depth_module.depth_format": "Z16",
+    # "depth_module.hdr_enabled": True,
     "depth_module.min_distance": 190,
     "depth_module.digital_gain": 2,
     "depth_module.receiver_gain": 18,
@@ -110,10 +117,10 @@ right_camera_params = {
     "depth_module.visual_preset": 5,
     "depth_module.invalidation_bypass": False,
 
-    "enable_infra": True,
+    "enable_infra": False,
     "enable_infra1": False,
     "enable_infra2": False,
-    "enable_confidence": True,
+    "enable_confidence": False,
 
     "enable_gyro": False,
     "enable_accel": False,
@@ -125,10 +132,10 @@ right_camera_params = {
 
     "enable_rgbd": True,
 
-    "pointcloud.enable": True,
-    "pointcloud.stream_filter": 2,
-    "pointcloud.ordered_pc": True,
-    "pointcloud.allow_no_texture_points": False,
+    "pointcloud__neon_.enable": True,
+    "pointcloud__neon_.stream_filter": 2,
+    "pointcloud__neon_.ordered_pc": False,
+    "pointcloud__neon_.allow_no_texture_points": False,
 
     "align_depth.enable": True,
     "colorizer.enable": False,
@@ -143,10 +150,10 @@ right_camera_params = {
     "tf_publish_rate": 0.0,
     "publish_odom_tf": False,
 
-    "clip_distance": -2.0,
+    "clip_distance": 1.0,
     "angular_velocity_cov": 0.01,
     "linear_accel_cov": 0.01,
-    "diagnostics_period": 5.0,
+    "diagnostics_period": 1.0,
     "wait_for_device_timeout": -1.0,
     "reconnect_timeout": 3.0,
 }
@@ -164,21 +171,18 @@ def yaml_to_dict(path_to_yaml):
 def generate_launch_description():
     ld = LaunchDescription()
 
-    params_file = LaunchConfiguration("params_file")
+    camera_params_file = LaunchConfiguration("camera_params_file")
 
-    params_file_arg = DeclareLaunchArgument(
-        "params_file",
-        default_value=PathJoinSubstitution([
-            FindPackageShare('robostore_bringup'),
-            'params',
-            'camera_w_d435_config.yaml'
-        ]),
+    camera_params_file_arg = DeclareLaunchArgument(
+        "camera_params_file",
+        default_value=os.path.join(
+            get_package_share_directory("robostore_bringup"), "params", "camera_w_d435_config.yaml"),
         description=""
     )
     auto_configure_arg = DeclareLaunchArgument('auto_configure', default_value='true')
     auto_activate_arg = DeclareLaunchArgument('auto_activate', default_value='false')
 
-    ld.add_action(params_file_arg)
+    ld.add_action(camera_params_file_arg)
     ld.add_action(auto_configure_arg)
     ld.add_action(auto_activate_arg)
 
@@ -186,14 +190,15 @@ def generate_launch_description():
     
     for camera in CAMERA_NODE:
         # Use LifecycleNode for better lifecycle management
+        params = left_camera_params if camera == "left_camera" else right_camera_params
         node = LifecycleNode(
             package='realsense2_camera',
             namespace=camera,
             name="realsense",
             executable='realsense2_camera_node',
             parameters=[
-                params_file,
-                left_camera_params if camera == "left_camera" else right_camera_params
+                camera_params_file,
+                params
             ],
             output="screen",
             arguments=['--ros-args', '--log-level', "info"],
@@ -239,7 +244,7 @@ def generate_launch_description():
     camera_manager = Node(
         package='camera_manager',
         executable='camera_manager',
-        parameters=[params_file],
+        parameters=[camera_params_file],
         output="screen",
         arguments=['--ros-args', '--log-level', "info"],
         emulate_tty=True,
@@ -248,7 +253,7 @@ def generate_launch_description():
     # web_video_server = Node(
     #     package='web_video_server',
     #     executable='web_video_server',
-    #     parameters=[params_file],
+    #     parameters=[camera_params_file],
     #     output="screen",
     #     arguments=['--ros-args', '--log-level', "info"],
     #     emulate_tty=True,
@@ -258,3 +263,4 @@ def generate_launch_description():
     # ld.add_action(web_video_server)
 
     return ld
+
