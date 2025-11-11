@@ -92,7 +92,7 @@ def generate_launch_description():
     )
     ld.add_action(gripper_node)
     
-    controllers = ["left_arm", "right_arm", "fold_elevator"]
+    controllers = ["left_arm", "left_action_arm", "right_arm", "right_action_arm", "fold_elevator"]
     
     for controller in controllers:
         node = Node(

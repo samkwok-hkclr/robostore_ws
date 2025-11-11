@@ -3,5 +3,9 @@ install/
 log/
 backup/
 vision_data/
+code_backup/
 cmd.txt
 test.log
+arm_cmd.txt
+config.yaml
+fold_elevator_cmd.txt
