@@ -2,8 +2,42 @@
 	path = src/external_libraries/realsense-ros
 	url = https://github.com/IntelRealSense/realsense-ros
 	branch = ros2-master
-
-[submodule "fold_elevator"]
+[submodule "src/camera_manager"]
+	path = src/camera_manager
+	url = https://github.com/samkwok-hkclr/camera_manager
+[submodule "src/can_brigde"]
+	path = src/can_brigde
+	url = https://github.com/samkwok-hkclr/can_brigde
+[submodule "src/dual_arm"]
+	path = src/dual_arm
+	url = https://github.com/samkwok-hkclr/dual_arm
+[submodule "src/dual_arm_robot"]
+	path = src/dual_arm_robot
+	url = https://github.com/HKCLR2021/dual_arm_robot
+[submodule "src/gripper"]
+	path = src/gripper
+	url = https://github.com/samkwok-hkclr/gripper
+[submodule "src/robostore_msgs"]
+	path = src/robostore_msgs
+	url = https://github.com/HKCLR2021/robostore_msgs
+[submodule "src/robot_controller"]
+	path = src/robot_controller
+	url = https://github.com/samkwok-hkclr/robot_controller
+[submodule "src/robot_controller_msgs"]
+	path = src/robot_controller_msgs
+	url = https://github.com/samkwok-hkclr/robot_controller_msgs
+[submodule "src/robotic_platform"]
+	path = src/robotic_platform
+	url = https://github.com/samkwok-hkclr/robotic_platform
+[submodule "src/robotic_platform_msgs"]
+	path = src/robotic_platform_msgs
+	url = https://github.com/samkwok-hkclr/robotic_platform_msgs
+[submodule "src/ros_gateway"]
+	path = src/ros_gateway
+	url = https://github.com/HKCLR2021/ros_gateway
+[submodule "src/vision_recognition"]
+	path = src/vision_recognition
+	url = https://github.com/samkwok-hkclr/vision_recognition
+[submodule "src/fold_elevator"]
 	path = src/fold_elevator
 	url = https://github.com/samkwok-hkclr/fold_elevator
-	branch = master

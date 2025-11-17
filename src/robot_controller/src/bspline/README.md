@@ -1,1 +1,0 @@
-This b-spline library is based on [clr_robot](https://github.com/HKCLR2021/clr_robot) and modified part of source code.
