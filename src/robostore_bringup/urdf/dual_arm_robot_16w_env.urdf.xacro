@@ -40,7 +40,7 @@
   </xacro:dual_arm_robot>
 
   <xacro:table name="table" id="1" parent="map">
-    <origin xyz="1.47 0.8 0" rpy="0 0 3.14159265359"/>
+    <origin xyz="1.38 0.8 0" rpy="0 0 3.14159265359"/>
   </xacro:table>
 
   <xacro:rack name="rack" id="1" parent="map">

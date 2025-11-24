@@ -37,27 +37,27 @@
     </link>
 
     <xacro:place_location parent="${name}_${id}_base_link" prefix="${name}_${id}" index="1">
-      <origin xyz="0.4 0.15 ${table_height}" rpy="0 0 0"/>
+      <origin xyz="0.45 0.15 ${table_height}" rpy="0 0 0"/>
     </xacro:place_location>
 
     <xacro:place_location parent="${name}_${id}_base_link" prefix="${name}_${id}" index="2">
-      <origin xyz="0.55 0.15 ${table_height}" rpy="0 0 0"/>
+      <origin xyz="0.6 0.15 ${table_height}" rpy="0 0 0"/>
     </xacro:place_location>
 
     <xacro:place_location parent="${name}_${id}_base_link" prefix="${name}_${id}" index="3">
-      <origin xyz="0.7 0.15 ${table_height}" rpy="0 0 0"/>
+      <origin xyz="0.75 0.15 ${table_height}" rpy="0 0 0"/>
     </xacro:place_location>
 
     <xacro:place_location parent="${name}_${id}_base_link" prefix="${name}_${id}" index="4">
-      <origin xyz="0.4 0.05 ${table_height}" rpy="0 0 0"/>
+      <origin xyz="0.45 0.05 ${table_height}" rpy="0 0 0"/>
     </xacro:place_location>
 
     <xacro:place_location parent="${name}_${id}_base_link" prefix="${name}_${id}" index="5">
-      <origin xyz="0.55 0.05 ${table_height}" rpy="0 0 0"/>
+      <origin xyz="0.6 0.05 ${table_height}" rpy="0 0 0"/>
     </xacro:place_location>
 
     <xacro:place_location parent="${name}_${id}_base_link" prefix="${name}_${id}" index="6">
-      <origin xyz="0.7 0.05 ${table_height}" rpy="0 0 0"/>
+      <origin xyz="0.75 0.05 ${table_height}" rpy="0 0 0"/>
     </xacro:place_location>
   </xacro:macro>
   

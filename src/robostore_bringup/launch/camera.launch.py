@@ -6,105 +6,40 @@ from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch_ros.actions import Node, LifecycleNode
 from launch.conditions import IfCondition
-from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.actions import IncludeLaunchDescription, DeclareLaunchArgument, EmitEvent, RegisterEventHandler
+from launch.actions import DeclareLaunchArgument, EmitEvent, RegisterEventHandler
 from launch.events import matches_action
-from launch_ros.substitutions import FindPackageShare
 from launch_ros.event_handlers import OnStateTransition
 from launch.event_handlers import OnProcessStart
 from launch_ros.events.lifecycle import ChangeState
-from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
+from launch.substitutions import LaunchConfiguration
 from lifecycle_msgs.msg import Transition
 
 left_camera_params = {
     "camera_name": "left_camera",
-    "serial_no": "405622074042",
-    "usb_port_id": "",
-    "device_type": "d435(?!i)",
-    "initial_reset": True,
-
-    "enable_color": True,
-    "rgb_camera.color_profile": "1280,720,30",
-    "rgb_camera.color_format": "RGB8",
-    "rgb_camera.enable_auto_exposure": True,
-    "rgb_camera.power_line_frequency": 1,
-    "enable_auto_white_balance": True,   # flat param (not under rgb_camera)
-    
-    # "hdr_merge": True,
-
-    "enable_depth": True,
-    "depth_module.depth_profile": "1280,720,30",
-    "depth_module.depth_format": "Z16",
-    # "depth_module.hdr_enabled": True,
-    "depth_module.min_distance": 190,
-    "depth_module.digital_gain": 2,
-    "depth_module.receiver_gain": 18,
-    "depth_module.noise_filtering": 4,
-    "depth_module.post_processing_sharpening": 1,
-    "depth_module.pre_processing_sharpening": 0,
-    "depth_module.sensor_mode": 1,
-    "depth_module.visual_preset": 5,
-    "depth_module.invalidation_bypass": False,
-
-    "enable_infra": False,
-    "enable_infra1": False,
-    "enable_infra2": False,
-    "enable_confidence": False,
-
-    "enable_gyro": False,
-    "enable_accel": False,
-    "gyro_fps": 0,
-    "accel_fps": 0,
-    "unite_imu_method": 2,
-    "enable_sync": True,
-    "intra_process_comms": True,
-
-    "enable_rgbd": True,
-
-    "pointcloud__neon_.enable": True,
-    "pointcloud__neon_.stream_filter": 2,
-    "pointcloud__neon_.ordered_pc": False,
-    "pointcloud__neon_.allow_no_texture_points": False,
-
-    "align_depth.enable": True,
-    "colorizer.enable": False,
-    "decimation_filter.enable": True,
-    "spatial_filter.enable": True,
-    "temporal_filter.enable": True,
-    "disparity_filter.enable": False,
-    "hole_filling_filter.enable": True,
-    "hdr_merge.enable": True,
-
-    "publish_tf": True,
-    "tf_publish_rate": 0.0,
-    "publish_odom_tf": False,
-
-    "clip_distance": 1.0,
-    "angular_velocity_cov": 0.01,
-    "linear_accel_cov": 0.01,
-    "diagnostics_period": 1.0,
-    "wait_for_device_timeout": -1.0,
-    "reconnect_timeout": 3.0,
+    "serial_no": "405622074042" 
 }
 
 right_camera_params = {
     "camera_name": "right_camera",
     "serial_no": "138422074515",
+}
+    
+camera_params = {
     "usb_port_id": "",
     "device_type": "d435(?!i)",
-    "initial_reset": True,
+    "initial_reset": False,
 
     "enable_color": True,
-    "rgb_camera.color_profile": "1280,720,30",
+    "rgb_camera.color_profile": "1280,720,6",
     "rgb_camera.color_format": "RGB8",
     "rgb_camera.enable_auto_exposure": True,
     "rgb_camera.power_line_frequency": 1,
-    "enable_auto_white_balance": True,
+    "enable_auto_white_balance": True, 
     
     # "hdr_merge": True,
 
     "enable_depth": True,
-    "depth_module.depth_profile": "1280,720,30",
+    "depth_module.depth_profile": "1280,720,6",
     "depth_module.depth_format": "Z16",
     # "depth_module.hdr_enabled": True,
     "depth_module.min_distance": 190,
@@ -117,15 +52,15 @@ right_camera_params = {
     "depth_module.visual_preset": 5,
     "depth_module.invalidation_bypass": False,
 
-    "enable_infra": False,
+    "enable_infra": True,
     "enable_infra1": False,
     "enable_infra2": False,
     "enable_confidence": False,
 
-    "enable_gyro": False,
-    "enable_accel": False,
-    "gyro_fps": 0,
-    "accel_fps": 0,
+    "enable_gyro": True,
+    "enable_accel": True,
+    "gyro_fps": 50,
+    "accel_fps": 50,
     "unite_imu_method": 2,
     "enable_sync": True,
     "intra_process_comms": True,
@@ -153,9 +88,9 @@ right_camera_params = {
     "clip_distance": 1.0,
     "angular_velocity_cov": 0.01,
     "linear_accel_cov": 0.01,
-    "diagnostics_period": 1.0,
+    "diagnostics_period": 5.0,
     "wait_for_device_timeout": -1.0,
-    "reconnect_timeout": 3.0,
+    "reconnect_timeout": 5.0,
 }
 
 def generate_launch_description():
@@ -180,7 +115,8 @@ def generate_launch_description():
     
     for camera in CAMERA_NODE:
         # Use LifecycleNode for better lifecycle management
-        params = left_camera_params if camera == "left_camera" else right_camera_params
+        p = left_camera_params if camera == "left_camera" else right_camera_params
+        params = camera_params | p
         node = LifecycleNode(
             package='realsense2_camera',
             namespace=camera,
@@ -240,14 +176,14 @@ def generate_launch_description():
         emulate_tty=True,
     )
 
-    # web_video_server = Node(
-    #     package='web_video_server',
-    #     executable='web_video_server',
-    #     parameters=[camera_params_file],
-    #     output="screen",
-    #     arguments=['--ros-args', '--log-level', "info"],
-    #     emulate_tty=True,
-    # )
+    web_video_server = Node(
+        package='web_video_server',
+        executable='web_video_server',
+        parameters=[camera_params_file],
+        output="screen",
+        arguments=['--ros-args', '--log-level', "info"],
+        emulate_tty=True,
+    )
 
     ld.add_action(camera_manager)
     # ld.add_action(web_video_server)

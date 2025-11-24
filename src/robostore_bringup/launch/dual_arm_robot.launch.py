@@ -263,32 +263,6 @@ def generate_launch_description():
         )
     )
     
-    # ld.add_action(
-    #     Node(
-    #         package="joint_state_publisher",
-    #         executable="joint_state_publisher",
-    #         name="joint_state_publisher",
-    #         output="screen",
-    #         parameters=[{
-    #             "robot_description": robot_description_content
-    #         }],
-    #         remappings=[
-    #             ("~/robot_description", "/robot_description"),
-    #             ("~/joint_states", "/joint_states")
-    #         ]
-    #     )
-    # )
-    
-    # Static TF transform (world to base_link)
-    # ld.add_action(
-    #     Node(
-    #         package="tf2_ros",
-    #         executable="static_transform_publisher",
-    #         name="static_transform_publisher",
-    #         arguments=["0", "0", "0", "0", "0", "0", "world", "base_link"]
-    #     )
-    # )
-    
     # RViz
     ld.add_action(
         Node(

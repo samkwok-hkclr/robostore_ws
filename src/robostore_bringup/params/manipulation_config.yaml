@@ -11,6 +11,7 @@ action_planner:
   ros__parameters:
     # sim: false
     eef_offset: [0.0, 0.0, 0.0] # manual offset
+    obj_pose_offset: 0.0075
     pre_obj_pose_shift: 0.1
     pre_place_pose_shift: 0.15
     post_pick_lift_offset: 0.02
@@ -25,15 +26,16 @@ motion_planner:
 
     left_zero_joints: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
     left_home_joints: [0.6909, 1.3581, -1.2883, -1.8352, 0.0238, -0.4530, 0.3616]
-    left_holding_joints: [-0.1290, 0.8766, -0.2334, -1.7444, 0.3358, 1.0115, 1.0033]
+    # left_holding_joints: [-0.1290, 0.8766, -0.2334, -1.7444, 0.3358, 1.0115, 1.0033]
+    left_holding_joints: [1.1825, 1.4336, -1.3192, -1.9627, 1.5372, 0.2839, -0.8126]
     left_action_joints: [-0.3649, 0.8048, -0.1931, -2.0853, 0.4905, 1.2842, 0.6162]
 
     right_zero_joints: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
     right_home_joints: [-0.6909, 1.3581, 1.2883, -1.8352, 0.0238, -0.4530, -0.3616]
-    right_holding_joints: [0.1290, 0.8766, 0.2334, -1.7444, -0.3358, 1.0115, -1.0033]
+    # right_holding_joints: [0.1290, 0.8766, 0.2334, -1.7444, -0.3358, 1.0115, -1.0033]
+    right_holding_joints: [-1.1825, 1.4336, 1.3192, -1.9627, -1.5372, 0.2839, -0.8126]
     right_action_joints: [0.3649, 0.8048, 0.1931, -2.0853, -0.4905, 1.2842, -0.6162]
 
-    
 collision_planner:
   ros__parameters:
     # sim: false
@@ -45,11 +47,11 @@ workflow_planner:
     max_pick_attempt: 2
     valid_z_threshold: 0.1 # filter invalid vision recognition result
     max_scan_attempt: 2
-    re_scan_x_translation: 0.05
+    re_scan_x_translation: 0.02
     re_scan_y_translation: 0.1
     place_offset: 0.01
-    scan_x_distance: 0.03
-    scan_z_distance: 0.26
+    scan_x_distance: 0.025
+    scan_z_distance: 0.27
     optimal_arm_flat_height_distance: 0.2
     table_front_offset: 0.6
     table_height_offset: 0.1
@@ -66,7 +68,7 @@ fold_elevator_driver:
 vacuum_gripper:
   ros__parameters:
     # sim: false
-    leak_threshold: -40000.0 # unit: Pa
+    leak_threshold: -35000.0 # unit: Pa
 
 /left_arm/robot_controller:
   ros__parameters:
@@ -108,6 +110,15 @@ vacuum_gripper:
     default_eef_step: 0.005
     default_jump_threshold: 5.0
 
+tf_broadcaster:
+  ros__parameters:
+    rack_1_shelf_1: [ 0.0 ]
+    rack_1_shelf_2: [ 0.22, 0.37, 0.90 ]
+    rack_1_shelf_3: [ 0.22, 0.37, 0.61, 0.79, 0.92, 1.05 ]
+    rack_1_shelf_4: [ 0.22, 0.37, 0.61, 0.79, 0.92, 1.05 ]
+    left_tcp_to_camera: [ 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0 ]
+    right_tcp_to_camera: [ 0.08855604, -0.03328494, -0.11521747, -0.00347244, -0.00389369, 0.70516316, 0.70902588 ]
+
 gripper:
   ros__parameters:
     # sim: false
@@ -129,7 +140,7 @@ gripper:
     max_range: 0.5
 
     # vaccum pressure
-    leak_threshold: -40000.0   # unit: Pa
+    leak_threshold: -35000.0   # unit: Pa
 
 
 

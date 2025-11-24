@@ -63,6 +63,30 @@ def generate_launch_description():
     ld.add_action(declare_params_file)
     # ld.add_action(declare_col_obj_file_cmd)
     ld.add_action(declare_poses_file_cmd)
+    
+    manager = Node(
+        package='robotic_platform',
+        executable='manager',
+        parameters=[
+            params_file,
+        ],
+        output="screen",
+        arguments=['--ros-args', '--log-level', "info"],
+        emulate_tty=True,
+    )
+    ld.add_action(manager)
+    
+    action_planner = Node(
+        package='robotic_platform',
+        executable='action_planner',
+        parameters=[
+            params_file,
+        ],
+        output="screen",
+        arguments=['--ros-args', '--log-level', "info"],
+        emulate_tty=True,
+    )
+    ld.add_action(action_planner)
 
     platform_server = Node(
         package='robotic_platform',
