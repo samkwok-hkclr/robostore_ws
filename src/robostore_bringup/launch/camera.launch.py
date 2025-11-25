@@ -88,9 +88,9 @@ camera_params = {
     "clip_distance": 1.0,
     "angular_velocity_cov": 0.01,
     "linear_accel_cov": 0.01,
-    "diagnostics_period": 5.0,
+    "diagnostics_period": 10.0,
     "wait_for_device_timeout": -1.0,
-    "reconnect_timeout": 5.0,
+    "reconnect_timeout": 30.0,
 }
 
 def generate_launch_description():

@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+
+<robot name="dual_arm_robot" xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <xacro:include filename="$(find robostore_bringup)/urdf/materials.xacro" />
+  <xacro:include filename="$(find dual_arm_robot)/urdf/dual_arm_robot.urdf.xacro" />
+
+  <xacro:arg name="left_arm_sim" default="true" />
+  <xacro:arg name="left_arm_can_interface" default="can0" />
+
+  <xacro:arg name="right_arm_sim" default="true" />
+  <xacro:arg name="right_arm_can_interface" default="can1" />
+
+  <xacro:arg name="fold_elevator_sim" default="true" />
+  <xacro:arg name="fold_elevator_can_interface" default="can2" />
+
+  <xacro:arg name="to_be_done" default="false"/>
+
+  <link name="map"/>
+
+  <joint name="base_footprint_joint" type="planar">
+    <parent link="map"/>
+    <child link="base_footprint"/>
+  </joint>
+
+  <link name="base_footprint"/>
+
+  <xacro:dual_arm_robot 
+    name="dual_arm_robot" 
+    parent="base_footprint"
+    left_arm_sim="$(arg left_arm_sim)"
+    left_arm_can_interface="$(arg left_arm_can_interface)"
+    right_arm_sim="$(arg right_arm_sim)"
+    right_arm_can_interface="$(arg right_arm_can_interface)"
+    fold_elevator_sim="$(arg fold_elevator_sim)"
+    fold_elevator_can_interface="$(arg fold_elevator_can_interface)">
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </xacro:dual_arm_robot>
+
+</robot>
