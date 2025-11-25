@@ -68,6 +68,7 @@ fold_elevator_driver:
 vacuum_gripper:
   ros__parameters:
     # sim: false
+    enable_ultrasonic: false
     leak_threshold: -35000.0 # unit: Pa
 
 /left_arm/robot_controller:

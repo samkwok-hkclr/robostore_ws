@@ -76,6 +76,18 @@ def generate_launch_description():
     )
     ld.add_action(manager)
     
+    tf_broadcaster = Node(
+        package='robotic_platform',
+        executable='tf_broadcaster',
+        parameters=[
+            params_file,
+        ],
+        output="screen",
+        arguments=['--ros-args', '--log-level', "info"],
+        emulate_tty=True,
+    )
+    ld.add_action(tf_broadcaster)
+    
     action_planner = Node(
         package='robotic_platform',
         executable='action_planner',
