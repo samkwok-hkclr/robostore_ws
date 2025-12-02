@@ -2,7 +2,8 @@ import os
 import yaml
 
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, RegisterEventHandler
+from launch.event_handlers import OnProcessStart
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, Command, FindExecutable, PathJoinSubstitution
 from launch_ros.actions import Node
@@ -81,7 +82,7 @@ def generate_launch_description():
     declared_arguments.append(
         DeclareLaunchArgument(
             "left_arm_sim",
-            default_value="true",
+            default_value="false",
         )
     )
     
@@ -95,7 +96,7 @@ def generate_launch_description():
     declared_arguments.append(
         DeclareLaunchArgument(
             "right_arm_sim",
-            default_value="true",
+            default_value="false",
         )
     )
     
@@ -109,7 +110,7 @@ def generate_launch_description():
     declared_arguments.append(
         DeclareLaunchArgument(
             "fold_elevator_sim",
-            default_value="true",
+            default_value="false",
         )
     )
     
@@ -313,6 +314,5 @@ def generate_launch_description():
                 ]
             )
         )
-
-    
+        
     return ld

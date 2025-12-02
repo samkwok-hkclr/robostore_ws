@@ -1,17 +1,6 @@
 <launch>
-  <arg name="default_call_service_timeout" default="5.0" />
-  <arg name="call_services_in_new_thread" default="true" />
-  <arg name="send_action_goals_in_new_thread" default="true" />
 
   <include file="$(find-pkg-share can_brigde)/launch/can_brigde.launch.py">
-  </include>
-
-  <node pkg="ros_gateway" exec="server"/>
-
-  <include file="$(find-pkg-share rosbridge_server)/launch/rosbridge_websocket_launch.xml">
-    <arg name="default_call_service_timeout" value="$(var default_call_service_timeout)" />
-    <arg name="call_services_in_new_thread" value="$(var call_services_in_new_thread)" />
-    <arg name="send_action_goals_in_new_thread" value="$(var send_action_goals_in_new_thread)" />
   </include>
 
 </launch>

@@ -1,0 +1,65 @@
+/**:
+  ros__parameters:
+    sim: false
+
+manager:
+  ros__parameters:
+    rotation_name: [ "" ]
+    arm_poses_name: ["home", "holding", "action"]
+
+vacuum_gripper:
+  ros__parameters:
+    # sim: false
+    enable_ultrasonic: false
+    leak_threshold: -35000.0 # unit: Pa
+
+tf_broadcaster:
+  ros__parameters:
+    rack_1_shelf_1: [ 0.0 ]
+    rack_1_shelf_2: [ 0.0 ]
+    rack_1_shelf_3: [ 0.0 ]
+    rack_1_shelf_4: [ 0.0 ]
+    left_tcp_to_camera: [ 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0 ]
+    right_tcp_to_camera: [ 0.08855604, -0.03328494, -0.11521747, -0.00347244, -0.00389369, 0.70516316, 0.70902588 ]
+
+/left_arm/robot_controller:
+  ros__parameters:
+    group_name: "left_arm"
+    eef_name: "left_tcp"
+    ref_frame: "dual_arm_base_link"
+    default_eef_step: 0.01
+    default_jump_threshold: 5.0
+
+/right_arm/robot_controller:
+  ros__parameters:
+    group_name: "right_arm"
+    eef_name: "right_tcp"
+    ref_frame: "dual_arm_base_link"
+    default_eef_step: 0.01
+    default_jump_threshold: 5.0
+
+gripper:
+  ros__parameters:
+    # sim: false
+    can_id: 0x55
+    can_namespace: "upper_orin"
+    can_interface: "can2"
+
+    # clip
+    enable_clip: true
+    min_gripper_force: 20
+    max_gripper_force: 100
+    min_gripper_position: 0.0
+    max_gripper_position: 95.0
+
+    # ultrasonic sensor
+    enable_ultrasonic: false
+    field_of_view: 0.3
+    min_range: 0.05
+    max_range: 0.5
+
+    # vaccum pressure
+    leak_threshold: -35000.0   # unit: Pa
+
+
+

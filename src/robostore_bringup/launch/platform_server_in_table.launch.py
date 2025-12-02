@@ -20,11 +20,11 @@ def generate_launch_description():
         .robot_description(
             file_path=os.path.join(
                     get_package_share_directory("robostore_bringup"),
-                    "urdf/dual_arm_robot_16w_env.urdf.xacro",
+                    "urdf/dual_arm_in_table.urdf.xacro",
             )
         )
             # file_path="urdf/dual_arm_robot.urdf.xacro")
-        .robot_description_semantic(file_path="config/dual_arm_robot.srdf")
+        .robot_description_semantic(file_path="config/dual_arm.srdf")
         .to_moveit_configs()
     )
     
@@ -32,8 +32,6 @@ def generate_launch_description():
 
     use_respawn = LaunchConfiguration("use_respawn")
     params_file = LaunchConfiguration("params_file")
-    # collision_objects_file = LaunchConfiguration("collision_objects_file")
-    poses_file = LaunchConfiguration("poses_file")
 
     declare_use_respawn = DeclareLaunchArgument(
         "use_respawn",
@@ -43,27 +41,12 @@ def generate_launch_description():
     declare_params_file = DeclareLaunchArgument(
         "params_file",
         default_value=os.path.join(
-            get_package_share_directory("robostore_bringup"), "params", "manipulation_config.yaml"),
-        description="",
-    )
-    
-    # declare_col_obj_file_cmd = DeclareLaunchArgument(
-    #     "collision_objects_file",
-    #     default_value=os.path.join(
-    #         get_package_share_directory("robostore_bringup"), "params", "collision_objects.yaml"),
-    #     description="",
-    # )
-    declare_poses_file_cmd = DeclareLaunchArgument(
-        "poses_file",
-        default_value=os.path.join(
-            get_package_share_directory("robostore_bringup"), "params", "poses.yaml"),
+            get_package_share_directory("robostore_bringup"), "params", "manipulation_config_in_table.yaml"),
         description="",
     )
 
     ld.add_action(declare_use_respawn)
     ld.add_action(declare_params_file)
-    # ld.add_action(declare_col_obj_file_cmd)
-    ld.add_action(declare_poses_file_cmd)
     
     manager = Node(
         package='robotic_platform',
@@ -77,46 +60,18 @@ def generate_launch_description():
     )
     ld.add_action(manager)
     
-    tf_broadcaster = Node(
-        package='robotic_platform',
-        executable='tf_broadcaster',
-        parameters=[
-            params_file,
-        ],
-        output="screen",
-        arguments=['--ros-args', '--log-level', "info"],
-        emulate_tty=True,
-    )
-    ld.add_action(tf_broadcaster)
+    # tf_broadcaster = Node(
+    #     package='robotic_platform',
+    #     executable='tf_broadcaster',
+    #     parameters=[
+    #         params_file,
+    #     ],
+    #     output="screen",
+    #     arguments=['--ros-args', '--log-level', "info"],
+    #     emulate_tty=True,
+    # )
+    # ld.add_action(tf_broadcaster)
     
-    action_planner = Node(
-        package='robotic_platform',
-        executable='action_planner',
-        parameters=[
-            params_file,
-        ],
-        output="screen",
-        arguments=['--ros-args', '--log-level', "info"],
-        emulate_tty=True,
-    )
-    ld.add_action(action_planner)
-
-    platform_server = Node(
-        package='robotic_platform',
-        executable='platform_server',
-        parameters=[
-            params_file,
-            {
-                # "collision_objects_file": collision_objects_file,
-                "poses_file": poses_file,
-            }
-        ],
-        output="screen",
-        arguments=['--ros-args', '--log-level', "info"],
-        emulate_tty=True,
-    )
-    ld.add_action(platform_server)
-
     gripper_node = Node(
         package="gripper",
         executable="gripper",
@@ -152,7 +107,7 @@ def generate_launch_description():
         )
     )
     
-    controllers = ["left_arm", "left_action_arm", "right_arm", "right_action_arm", "fold_elevator"]
+    controllers = ["left_arm", "right_arm"]
     
     for controller in controllers:
         node = Node(

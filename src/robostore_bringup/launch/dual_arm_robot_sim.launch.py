@@ -2,7 +2,8 @@ import os
 import yaml
 
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, RegisterEventHandler
+from launch.event_handlers import OnProcessStart
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, Command, FindExecutable, PathJoinSubstitution
 from launch_ros.actions import Node
@@ -32,7 +33,7 @@ def generate_launch_description():
         .robot_description(
             file_path=os.path.join(
                     get_package_share_directory("robostore_bringup"),
-                    "urdf/dual_arm_robot_demo.urdf.xacro",
+                    "urdf/dual_arm_robot_16w_env.urdf.xacro",
             ),
             mappings={
                 "initial_positions_file": os.path.join(
@@ -88,7 +89,7 @@ def generate_launch_description():
     declared_arguments.append(
         DeclareLaunchArgument(
             "left_arm_can_interface",
-            default_value="can0",
+            default_value="sim_can0",
         )
     )
     
@@ -102,7 +103,7 @@ def generate_launch_description():
     declared_arguments.append(
         DeclareLaunchArgument(
             "right_arm_can_interface",
-            default_value="can1",
+            default_value="sim_can1",
         )
     )
     
@@ -116,7 +117,7 @@ def generate_launch_description():
     declared_arguments.append(
         DeclareLaunchArgument(
             "fold_elevator_can_interface",
-            default_value="can2",
+            default_value="sim_can2",
         )
     )
     
@@ -280,6 +281,16 @@ def generate_launch_description():
         )
     )
     
+    can_brigdes = IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(
+                os.path.join(
+                    get_package_share_directory("can_brigde"),
+                    "launch",
+                    "can_brigde.launch.py")
+            )
+        )
+    ld.add_action(can_brigdes)
+    
     ros2_control = Node(
         package="controller_manager",
         executable="ros2_control_node",
@@ -291,7 +302,13 @@ def generate_launch_description():
             ("~/robot_description", "/robot_description"),
         ]
     )
-    ld.add_action(ros2_control)
+    ros2_control_event = RegisterEventHandler(
+            event_handler=OnProcessStart(
+                target_action=ros2_control,
+                on_start=[can_brigdes]
+            )
+        )
+    ld.add_action(ros2_control_event)
 
     controller_names = moveit_config.trajectory_execution.get(
         "moveit_simple_controller_manager", {}
