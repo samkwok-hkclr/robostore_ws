@@ -11,6 +11,7 @@
 [submodule "src/dual_arm"]
 	path = src/dual_arm
 	url = https://github.com/samkwok-hkclr/dual_arm
+	branch = V2
 [submodule "src/dual_arm_robot"]
 	path = src/dual_arm_robot
 	url = https://github.com/HKCLR2021/dual_arm_robot
@@ -41,3 +42,4 @@
 [submodule "src/fold_elevator"]
 	path = src/fold_elevator
 	url = https://github.com/samkwok-hkclr/fold_elevator
+	branch = V2
