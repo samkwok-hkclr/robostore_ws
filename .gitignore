@@ -1,6 +1,7 @@
 build/
 install/
 log/
+.vscode/
 backup/
 vision_data/
 calibration_data/
@@ -11,3 +12,4 @@ test.log
 arm_cmd.txt
 config.yaml
 fold_elevator_cmd.txt
+nohup.out

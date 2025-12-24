@@ -5,9 +5,9 @@
 [submodule "src/camera_manager"]
 	path = src/camera_manager
 	url = https://github.com/samkwok-hkclr/camera_manager
-[submodule "src/can_brigde"]
-	path = src/can_brigde
-	url = https://github.com/samkwok-hkclr/can_brigde
+[submodule "src/can_bridge"]
+	path = src/can_bridge
+	url = https://github.com/samkwok-hkclr/can_bridge
 [submodule "src/dual_arm"]
 	path = src/dual_arm
 	url = https://github.com/samkwok-hkclr/dual_arm
