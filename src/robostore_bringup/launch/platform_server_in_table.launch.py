@@ -48,17 +48,17 @@ def generate_launch_description():
     ld.add_action(declare_use_respawn)
     ld.add_action(declare_params_file)
     
-    manager = Node(
-        package='robotic_platform',
-        executable='manager',
-        parameters=[
-            params_file,
-        ],
-        output="screen",
-        arguments=['--ros-args', '--log-level', "info"],
-        emulate_tty=True,
-    )
-    ld.add_action(manager)
+    # manager = Node(
+    #     package='robotic_platform',
+    #     executable='manager',
+    #     parameters=[
+    #         params_file,
+    #     ],
+    #     output="screen",
+    #     arguments=['--ros-args', '--log-level', "info"],
+    #     emulate_tty=True,
+    # )
+    # ld.add_action(manager)
     
     # tf_broadcaster = Node(
     #     package='robotic_platform',
@@ -133,13 +133,13 @@ def generate_launch_description():
         )
         ld.add_action(node)
         
-    ld.add_action(
-        IncludeLaunchDescription(
-            PythonLaunchDescriptionSource(
-                os.path.join(
-                    get_package_share_directory("robostore_bringup"), "launch", "camera.launch.py")
-            )
-        )
-    )
+    # ld.add_action(
+    #     IncludeLaunchDescription(
+    #         PythonLaunchDescriptionSource(
+    #             os.path.join(
+    #                 get_package_share_directory("robostore_bringup"), "launch", "camera.launch.py")
+    #         )
+    #     )
+    # )
 
     return ld

@@ -323,15 +323,44 @@ def create_ros2_control_node(moveit_config):
 
 def create_controller_spawners():
     """Create controller spawner nodes."""
-    controllers = ["left_arm_controller", "right_arm_controller", "joint_state_broadcaster"]
+    basic_controller_names = [
+        "left_arm_controller", 
+        "right_arm_controller", 
+        "joint_state_broadcaster"
+    ]
+    effort_controller_names = [
+        "left_arm_effort_controller",
+        "right_arm_effort_controller",
+    ]
     nodes = []
     
-    for controller in controllers:
+    for controller in basic_controller_names:
         nodes.append(
             Node(
                 package="controller_manager",
                 executable="spawner",
-                arguments=[controller, "-c", "controller_manager"],
+                arguments=[
+                    controller, 
+                    "--controller-manager", "/controller_manager"
+                ],
+                output="screen",
+                remappings=[
+                    ("~/tf", "/tf"),
+                    ("~/tf_static", "/tf_static")
+                ]
+            )
+        )
+
+    for controller in effort_controller_names:
+        nodes.append(
+            Node(
+                package="controller_manager",
+                executable="spawner",
+                arguments=[
+                    controller, 
+                    "--controller-manager", "/controller_manager", 
+                    '--inactive'
+                ],
                 output="screen",
                 remappings=[
                     ("~/tf", "/tf"),

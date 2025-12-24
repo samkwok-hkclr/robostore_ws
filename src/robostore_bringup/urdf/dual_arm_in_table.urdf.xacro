@@ -21,7 +21,7 @@
     <xacro:property name="M_PI" value="3.14159265359" />
     <xacro:property name="M_PI_2" value="1.57079632679" />
 
-    <xacro:include filename="$(find dual_arm_description)/urdf/dual_arm.urdf.xacro" />
+    <xacro:include filename="$(find dual_arm_description)/urdf/dual_arm_w_mdh.urdf.xacro" />
     <xacro:include filename="$(find dual_arm_configure)/config/dual_arm.ros2_control.xacro" />
 
     <xacro:include filename="$(find dual_arm_robot)/robot_model/left_eef.urdf.xacro" />
@@ -37,7 +37,7 @@
     <xacro:arg name="to_be_done" default="false"/>
 
     <xacro:dual_arm name="dual_arm" parent="${parent}">
-      <origin xyz="-0.0064 0 0.26" rpy="0 0 ${M_PI}"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
     </xacro:dual_arm>
 
     <xacro:dual_arm_ros2_control 
@@ -55,7 +55,7 @@
     </xacro:sensor_d435>
 
     <xacro:left_eef name="${left_eef_name}" parent="link7_left">
-      <origin xyz="0 0.0335 0" rpy="0 0 0"/>
+      <origin xyz="0.0335 0 0" rpy="0 0 ${-M_PI_2}"/>
     </xacro:left_eef>
 
     <xacro:sensor_d435 
@@ -66,7 +66,7 @@
     </xacro:sensor_d435>
 
     <xacro:right_eef name="${right_eef_name}" parent="link7_right">
-      <origin xyz="0 0.0335 0" rpy="0 ${M_PI} 0"/>
+      <origin xyz="0.0335 0 0" rpy="0 0 ${-M_PI_2}"/>
     </xacro:right_eef>
 
   </xacro:macro>
@@ -91,7 +91,7 @@
     <visual>
       <origin xyz="0 0 0.395" rpy="0 0 0"/>
       <geometry>
-        <box size="0.6 0.6 0.79"/>
+        <box size="0.5 0.5 0.79"/>
       </geometry>
       <material name="">
         <color rgba="0.6 0.1960 0.8 1" />
@@ -101,13 +101,13 @@
     <collision>
       <origin xyz="0 0 0.395" rpy="0 0 0"/>
       <geometry>
-        <box size="0.6 0.6 0.79"/>
+        <box size="0.5 0.5 0.79"/>
       </geometry>
     </collision>
   </link>
 
   <joint name="dual_arm_robot_base_joint" type="fixed">
-    <origin xyz="0.215 0.215 0.80" rpy="0 0 0.5235987756"/>
+    <origin xyz="0 0 0.805" rpy="0 0 0"/>
     <parent link="table_base_link"/>
     <child link="dual_arm_base_link"/>
   </joint>
