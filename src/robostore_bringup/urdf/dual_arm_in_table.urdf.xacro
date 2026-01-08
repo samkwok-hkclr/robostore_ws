@@ -9,6 +9,9 @@
   <xacro:arg name="right_arm_sim" default="true" />
   <xacro:arg name="right_arm_can_interface" default="can1" />
 
+  <xacro:property name="M_PI" value="3.14159265359" />
+  <xacro:property name="M_PI_2" value="1.57079632679" />
+
   <xacro:macro name="dual_arm_in_table" params="
     name 
     parent 
@@ -107,7 +110,7 @@
   </link>
 
   <joint name="dual_arm_robot_base_joint" type="fixed">
-    <origin xyz="0 0 0.805" rpy="0 0 0"/>
+    <origin xyz="0.1 0 0.805" rpy="0 0 0"/>
     <parent link="table_base_link"/>
     <child link="dual_arm_base_link"/>
   </joint>
@@ -123,5 +126,81 @@
     right_arm_can_interface="$(arg right_arm_can_interface)">
     <origin xyz="0 0 0" rpy="0 0 0"/>
   </xacro:dual_arm_in_table>
+
+  <!-- <link name="box_table_base_link">
+    <visual>
+      <origin xyz="0 0 0.3175" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.73 0.5 0.635"/>
+      </geometry>
+      <material name="">
+        <color rgba="0.95 0.95 0.95 1" />
+      </material>
+    </visual>
+
+    <collision>
+      <origin xyz="0 0 0.3175" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.73 0.5 0.635"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="box_table_joint" type="fixed">
+    <origin xyz="0.625 0 0" rpy="0 0 0"/>
+    <parent link="table_base_link"/>
+    <child link="box_table_base_link"/>
+  </joint>
+
+  <link name="box_in_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://robostore_bringup/meshes/visual/material_box.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.15 0.15 0.15 1" />
+      </material>
+    </visual>
+
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://robostore_bringup/meshes/visual/material_box.STL" />
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="box_in_joint" type="fixed">
+    <origin xyz="-0.355 0.245 0.635" rpy="0 0 -${M_PI_2}"/>
+    <parent link="box_table_base_link"/>
+    <child link="box_in_link"/>
+  </joint>
+
+  <link name="box_out_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://robostore_bringup/meshes/visual/material_box.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.15 0.15 0.15 1" />
+      </material>
+    </visual>
+
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://robostore_bringup/meshes/visual/material_box.STL" />
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="box_out_joint" type="fixed">
+    <origin xyz="0 0.245 0.635" rpy="0 0 -${M_PI_2}"/>
+    <parent link="box_table_base_link"/>
+    <child link="box_out_link"/>
+  </joint> -->
+
 
 </robot>

@@ -13,7 +13,7 @@ camera_manager:
 
 data_saver:
   ros__parameters:
-    workspace_name: "robostore_upper_ws"
+    workspace_name: "robostore_ws"
     save_folder_name: "vision_data"
 
 web_video_server:

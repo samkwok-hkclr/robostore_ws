@@ -107,7 +107,7 @@ def generate_launch_description():
         )
     )
     
-    controllers = ["left_arm", "right_arm"]
+    controllers = ["left_arm", "right_arm", "dual_arm"]
     
     for controller in controllers:
         node = Node(

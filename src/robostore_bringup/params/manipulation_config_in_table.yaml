@@ -38,6 +38,14 @@ tf_broadcaster:
     default_eef_step: 0.01
     default_jump_threshold: 5.0
 
+/dual_arm/robot_controller:
+  ros__parameters:
+    group_name: "dual_arm"
+    eef_name: ""
+    ref_frame: "dual_arm_base_link"
+    default_eef_step: 0.01
+    default_jump_threshold: 5.0
+
 gripper:
   ros__parameters:
     # sim: false
